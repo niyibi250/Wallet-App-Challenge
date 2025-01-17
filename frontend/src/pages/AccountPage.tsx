@@ -12,11 +12,18 @@ function Accountpage() {
             <div className="text-2xl text-Grey-80 font-bold font-accent">Accounts</div>
             <div className=" flex flex-row gap-6">
                 <CustomButton
-                title='Add Account'
-                containerstyle=' py-2 px-8 bg-primary rounded-lg'
-                textstyle='text-lg text-Grey-5 font-medium'
-                iconstyle='text-lg text-Grey-5 font-medium pr-2'
-                icon={<IoMdAdd/>}
+                    title='Add Category'
+                    containerstyle=' py-2 px-8 bg-white rounded-lg border border-Grey-30 hover:border hover:border-primary'
+                    textstyle='text-lg text-Grey-80 font-medium'
+                    iconstyle='text-lg text-Grey-80 font-medium pr-2'
+                    icon={<IoMdAdd/>}
+                />
+                <CustomButton
+                    title='Add Account'
+                    containerstyle=' py-2 px-8 bg-primary text-Grey-5 rounded-lg hover:bg-white hover:text-Grey-80 hover:border hover:border-primary'
+                    textstyle='text-lg font-medium'
+                    iconstyle='text-lg font-medium pr-2 '
+                    icon={<IoMdAdd/>}
                 />
             </div>
         </div>

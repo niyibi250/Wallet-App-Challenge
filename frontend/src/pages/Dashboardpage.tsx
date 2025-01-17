@@ -24,9 +24,9 @@ function Dashboardpage() {
                 onSelect={handleSelect}/>
                 <CustomButton
                 title='Add transaction'
-                containerstyle=' py-2 px-8 bg-primary rounded-lg'
-                textstyle='text-lg text-Grey-5 font-medium'
-                iconstyle='text-lg text-Grey-5 font-medium pr-2'
+                containerstyle=' py-2 px-8 text-Grey-5  bg-primary rounded-lg hover:bg-white hover:text-Grey-80 border border-primary'
+                textstyle='text-lg font-medium'
+                iconstyle='text-lg font-medium pr-2'
                 icon={<IoMdAdd/>}
                 />
             </div>

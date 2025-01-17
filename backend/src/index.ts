@@ -1,4 +1,4 @@
-import express, { Application, NextFunction, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './docs/swaggerconfig';
@@ -8,7 +8,7 @@ import router from './routes/index';
 dotenv.config();
 const PORT = process.env.PORT || 5000;
 
-const app: Application = express();
+const app = express();
 app.use(express.json());
 
 // Route for the index page

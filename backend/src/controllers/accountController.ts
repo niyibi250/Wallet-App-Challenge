@@ -1,22 +1,73 @@
 import { Request, Response } from 'express';
-import {Account} from '../models/Account';
+import { Account } from '../models/Account';
+import { User } from '../models/User';
 
-export const createAccount = async (req: Request, res: Response): Promise<Response> => {
+// Interface for updating an account
+export interface UpdateAccountRequestBody {
+    accountName?: string;    // Optional update for account name
+    accountType?: string;    // Optional update for account type
+    accountBalance?: number; // Optional update for account balance
+}
+
+// Interface for creating an account
+export interface CreateAccountRequestBody {
+    userid: string;
+    accountName: string;     // Name of the account
+    accountNumber: string;   // Unique identifier for the account
+    accountType: string;     // Type of the account (e.g., Bank, Cash, MobileMoney)
+    accountBalance: number;  // Initial balance of the account
+}
+
+export const createAccount = async (req: Request, res: Response): Promise<void> => {
+    console.log(req.body)
     try {
-        const { name, type, balance } = req.body;
-        const account = new Account({ name, type, balance });
-        await account.save();
-        return res.status(201).json({ success: true, account });
+        const { userid,accountName, accountNumber, accountType, accountBalance } = req.body as CreateAccountRequestBody;
+        const userExists = await User.findById( userid );
+        if (userExists) {
+            const account = new Account({ userid,accountName, accountNumber, accountType, accountBalance });
+            await account.save();
+            res.status(201).json({ success: true, account });
+        } else {
+            res.status(404).json({ success: false, message: 'User does not exist' });
+        }
     } catch (error: any) {
-        return res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: error.message });
     }
 };
 
-export const getAccounts = async (req: Request, res: Response): Promise<Response> => {
+export const getAccounts = async (req: Request, res: Response): Promise<void> => {
     try {
         const accounts = await Account.find();
-        return res.status(200).json({ success: true, accounts });
+        res.status(200).json({ success: true, accounts });
     } catch (error: any) {
-        return res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const updateAccount = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const updatedAccount = await Account.findByIdAndUpdate(id, req.body as UpdateAccountRequestBody, { new: true });
+        if (!updatedAccount) {
+            res.status(404).json({ success: false, message: 'Account not found' });
+            return;
+        }
+        res.status(200).json({ success: true, account: updatedAccount });
+    } catch (error: any) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const deleteAccount = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const account = await Account.findByIdAndDelete(id);
+        if (!account) {
+            res.status(404).json({ success: false, message: 'Account not found' });
+            return;
+        }
+        res.status(200).json({ success: true, message: 'Account deleted successfully' });
+    } catch (error: any) {
+        res.status(500).json({ success: false, error: error.message });
     }
 };
