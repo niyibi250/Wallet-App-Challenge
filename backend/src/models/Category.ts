@@ -6,7 +6,7 @@ const SubCategorySchema = new Schema({
 });
 
 const CategorySchema = new Schema({
-  user: { type: Types.ObjectId, ref: 'User', required: true },
+  userId: { type: String, required: true },
   categoryName: { type: String, required: true },
   subcategories: [SubCategorySchema]
 }, { timestamps: true });
