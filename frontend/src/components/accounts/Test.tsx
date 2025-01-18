@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IoCloseCircleOutline } from 'react-icons/io5';
 import { Formik, Field, ErrorMessage, Form } from 'formik';
 import * as Yup from 'yup';
@@ -18,6 +18,7 @@ interface user {
   name: string;
   email: string;
 }
+
 interface TransactionValues {
   userId: string;
   accountName: string;
@@ -29,14 +30,8 @@ interface TransactionValues {
 }
 
 const AddTransactiontable = ({ onClose, onSave }: AddTransactionCardProps) => {
-  const { categories } = useCategories();
+  const { categories } = useCategories(); // Fetch categories from context
   const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   fetchCategories();
-  // }, [fetchCategories]);
-
-  console.log(categories);
 
   const validationSchema = Yup.object().shape({
     type: Yup.string().required('Transaction type is required'),
@@ -55,7 +50,7 @@ const AddTransactiontable = ({ onClose, onSave }: AddTransactionCardProps) => {
     accountName: '',
     type: 'Expense',
     amount: '',
-    categoryName: 'Food',
+    categoryName: 'Food', // Default category
     description: '',
     date: null,
   };
@@ -63,9 +58,9 @@ const AddTransactiontable = ({ onClose, onSave }: AddTransactionCardProps) => {
   const handleSubmit = async (values: typeof initialValues) => {
     try {
       const user: user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '') : { id: '', name: '', email: '' };
-      const formData = { ...values, userId: user.id};
+      const formData = { ...values, userId: user.id };
   
-      const response = await axios.post(`http://localhost:3000/api/transactions/`, formData);
+      const response = await axios.post('http://localhost:3000/api/transactions/', formData);
       console.log('Response:', response.data);
       navigate('/dashboard');
     } catch (error) {
@@ -132,7 +127,7 @@ const AddTransactiontable = ({ onClose, onSave }: AddTransactionCardProps) => {
                       name="categoryName"
                       className="w-full font-semibold text-lg border-2 rounded-lg p-2 mt-1 focus:border-primary focus:outline-none"
                     >
-                      {/* Render category options */}
+                      {/* Render dynamic category options */}
                       {categories && categories.length > 0 ? (
                         categories.map((category) => (
                           <option key={category._id} value={category.categoryName}>
@@ -145,22 +140,6 @@ const AddTransactiontable = ({ onClose, onSave }: AddTransactionCardProps) => {
                     </Field>
                     <ErrorMessage
                       name="categoryName"
-                      component="div"
-                      className="text-red-500 text-sm mt-1"
-                    />
-                  </div>
-                  <div className="w-1/2">
-                    <label className="block font-semibold">Account</label>
-                    <Field
-                      as="select"
-                      name="accountName"
-                      className="w-full font-semibold text-lg border-2 rounded-lg p-2 mt-1 focus:border-primary focus:outline-none"
-                    >
-                      <option value="Card **** 4156">Card **** 4156</option>
-                      <option value="Card **** 1234">Card **** 1234</option>
-                    </Field>
-                    <ErrorMessage
-                      name="accountName"
                       component="div"
                       className="text-red-500 text-sm mt-1"
                     />

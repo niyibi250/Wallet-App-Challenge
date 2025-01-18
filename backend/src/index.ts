@@ -4,12 +4,16 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './docs/swaggerconfig';
 import connectDB from './config/db';
 import router from './routes/index';
+import cors from 'cors';
 
 dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 const app = express();
 app.use(express.json());
+
+// Allow all origins
+app.use(cors());
 
 // Route for the index page
 app.get('/', (req: Request, res: Response): void => {

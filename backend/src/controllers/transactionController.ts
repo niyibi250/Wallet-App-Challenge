@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Transaction } from '../models/Transaction';
+import { User } from '../models/User';
 
 // Interface for creating a transaction
 export interface CreateTransactionRequestBody {
@@ -14,7 +15,7 @@ export interface CreateTransactionRequestBody {
 
 // Interface for updating a transaction
 export interface UpdateTransactionRequestBody {
-    type?: 'income' | 'expense';
+    type?: 'income' | 'expenses' | 'savings';
     amount?: number;
     accountName?: string;
     categoryName?: string;
@@ -24,6 +25,7 @@ export interface UpdateTransactionRequestBody {
 
 // Create a transaction
 export const createTransaction = async (req: Request, res: Response): Promise<void> => {
+    console.log(req.body)
     try {
         const { userId, type, amount, accountName, categoryName, description, date } = req.body as CreateTransactionRequestBody;
 
@@ -47,10 +49,15 @@ export const createTransaction = async (req: Request, res: Response): Promise<vo
 // Get all transactions for a user
 export const getTransactions = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { userId } = req.body;
-
-        const transactions = await Transaction.find({ userId });
+        const { userId } = req.query;
+        const userExists = await User.findById( userId );
+        if (userExists) {
+            const transactions = await Transaction.find({ userId });
         res.status(200).json({ success: true, transactions });
+        } else {
+            res.status(404).json({ success: false, message: 'User does not exist' });
+        }
+        
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
     }

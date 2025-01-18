@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Formik, Field, ErrorMessage, Form, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../../store';
-import { registerUser } from '../../features/auth/SignupSlice';
+import axios from 'axios';
+
 
 interface FormValues {
   name: string;
@@ -14,31 +13,25 @@ interface FormValues {
 }
 
 const Signupform = () => {
-  const dispatch: AppDispatch = useDispatch();
-  const signUpState = useSelector((state: RootState) => state.signUp);
   const navigate = useNavigate();
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const validationSchema = Yup.object().shape({
-    username: Yup.string().required('Username is required'),
+    name: Yup.string().required('Username is required'),
     email: Yup.string().email('Invalid email').required('Email is required'),
     password: Yup.string()
       .min(8, 'Password must be at least 8 characters')
       .required('Password is required'),
   });
 
-  const handleSubmit = (
-    values: FormValues,
-    actions: FormikHelpers<FormValues>
-  ) => {
-    dispatch(registerUser(values))
-      .then(() => {
-        actions.setSubmitting(false);
-        navigate('/login');
-      })
-      .catch(() => {
-        actions.setSubmitting(false);
-      });
+  const handleSubmit = async (values: FormValues) => {
+    try {
+      const response = await axios.post('http://localhost:3000/api/users/register', values);
+      console.log('Response:', response.data);
+      navigate('/login');
+    } catch (error) {
+      console.error('Signup failed:', error);
+    }
   };
 
   return (
@@ -61,13 +54,13 @@ const Signupform = () => {
               <Field
                 type="text"
                 id="username"
-                name="username"
+                name="name"
                 className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
                 placeholder="Enter your username"
               />
               <div className="h-5">
                 <ErrorMessage
-                  name="username"
+                  name="name"
                   component="div"
                   className="text-Red font-accent font-bold text-sm"
                 />
@@ -126,7 +119,7 @@ const Signupform = () => {
               disabled={isSubmitting}
               className="w-full bg-primary text-white py-2 rounded-lg hover:bg-green-700 transition"
             >
-              {isSubmitting ? 'Submitting...' : 'Sign Up'}
+              {isSubmitting  ? 'Submitting...' : 'Sign Up'}
             </button>
           </Form>
         )}

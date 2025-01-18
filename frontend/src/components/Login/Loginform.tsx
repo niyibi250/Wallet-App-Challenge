@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Formik, Field, ErrorMessage, Form, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import axios from 'axios';
 
 interface FormValues {
   email: string;
@@ -20,14 +21,19 @@ const   Loginform = () => {
       .required('Password is required'),
   });
 
-  const handleSubmit = (
-    values: FormValues,
-    actions: FormikHelpers<FormValues>
-  ) => {
-    console.log('Form values:', values);
-    actions.setSubmitting(false);
-    navigate('/login');
+  const handleSubmit = async (values: FormValues) => {
+    try {
+      const response = await axios.post('http://localhost:3000/api/users/login', values);
+      console.log('Response:', response.data);
+      const { user, token } = response.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Signup failed:', error);
+    }
   };
+
 
   return (
     <div className="bg-white p-8 shadow-lg w-full h-full">
@@ -95,7 +101,7 @@ const   Loginform = () => {
               disabled={isSubmitting}
               className="w-full bg-primary text-white py-2 rounded-lg hover:bg-green-700 transition"
             >
-              {isSubmitting ? 'Submitting...' : 'Sign Up'}
+              {isSubmitting ? 'Submitting...' : 'Sign In'}
             </button>
           </Form>
         )}

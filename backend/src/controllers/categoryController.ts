@@ -6,22 +6,22 @@ import { User } from '../models/User';
 export interface CreateCategoryRequestBody {
     userId: string;
     categoryName: string;
-    subcategories?: { name: string }[];
+    subcategories?: string[];
 }
 
 // Interface for updating a category
 export interface UpdateCategoryRequestBody {
     categoryName?: string;
-    subcategories?: { name: string, id: string }[];
+    subcategories?: string[];
 }
 
 export const createCategory = async (req: Request, res: Response): Promise<void> => {
+    console.log(req.body)
     try {
         const { userId, categoryName, subcategories } = req.body as CreateCategoryRequestBody;
         const userExists = await User.findById(userId);
 
         if (userExists) {
-            // Pass `userId` as the correct field name
             const category = new Category({ userId, categoryName, subcategories });
             await category.save();
             res.status(201).json({ success: true, category });
@@ -35,8 +35,15 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
 
 export const getCategories = async (req: Request, res: Response): Promise<void> => {
     try {
-        const categories = await Category.find().populate('userId');
+        const { userId} = req.query;
+        const userExists = await User.findById(userId);
+
+        if (userExists) {
+            const categories = await Category.find({ userId });
         res.status(200).json({ success: true, categories });
+        } else {
+            res.status(404).json({ success: false, message: 'User does not exist' });
+        }
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -70,14 +77,17 @@ export const deleteCategory = async (req: Request, res: Response): Promise<void>
     }
 };
 
+// Create subcategory for a given category
 export const createSubCategory = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
         const { name } = req.body;
+        
+        // Check if category exists
         const category = await Category.findById(id);
-
         if (category) {
-            category.subcategories.push({ name });
+            // Add subcategory to the category
+            category.subcategories.push(name);  // Add string name directly
             await category.save();
             res.status(201).json({ success: true, category });
         } else {
