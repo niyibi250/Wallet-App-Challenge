@@ -3,7 +3,7 @@ import { Schema, model, Types } from 'mongoose';
 const TransactionSchema = new Schema({
   userId: {type: String,required:true},
   accountName: { type:String, required: true },
-  type: { type: String, enum: ['income', 'expense'], required: true },
+  type: { type: String, enum: ['Income', 'Expense', 'Saving'], required: true },
   amount: { type: Number, required: true },
   categoryName: { type: String, required: false },
   description: { type: String, default: '' },

@@ -17,7 +17,7 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
         // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return next(new Error('User already exists'));
+            res.status(200).json({ message: 'User already exists', success: false });
         }
 
         // Hash the password
@@ -27,7 +27,7 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
         const user = new User({ name, email, password: hashedPassword });
         await user.save();
 
-        res.status(201).json({ message: 'User registered successfully', user });
+        res.status(200).json({ message: 'User registered successfully', user });
     } catch (error: any) {
         console.error('Error registering user:', error.message);
         next(error);

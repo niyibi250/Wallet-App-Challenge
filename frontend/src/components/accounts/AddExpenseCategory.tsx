@@ -1,92 +1,143 @@
-import React, { useState } from 'react';
-import { IoCloseCircleOutline } from "react-icons/io5";
-import { AiOutlinePlus, AiOutlineMinus } from "react-icons/ai";
+import React from 'react';
+import { IoCloseCircleOutline } from 'react-icons/io5';
+import { AiOutlinePlus, AiOutlineMinus } from 'react-icons/ai';
+import { Formik, Field, Form, ErrorMessage, FieldArray } from 'formik';
+import * as Yup from 'yup';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
+interface SubCategory {
+  name: String,
+}
 interface AddExpenseCategoryCardProps {
   onClose: () => void;
-  onSave: (categoryData: { categoryName: string; subcategories: string[] }) => void;
+  onSave: (accountData: {
+    userId: string;
+    accountName: string
+    subcategories?: SubCategory[];
+  }) => void;
 }
 
 const AddExpenseCategory = ({ onClose, onSave }: AddExpenseCategoryCardProps) => {
-  const [categoryName, setCategoryName] = useState('');
-  const [subcategories, setSubcategories] = useState<string[]>(['']);
-
-  const handleSubcategoryChange = (index: number, value: string) => {
-    const updatedSubcategories = [...subcategories];
-    updatedSubcategories[index] = value;
-    setSubcategories(updatedSubcategories);
+  const navigate = useNavigate();
+  const validationSchema = Yup.object().shape({
+    categoryName: Yup.string().required('Category name is required'),
+    subcategories: Yup.array()
+      .of(Yup.string().required('Subcategory cannot be empty'))
+      .min(1, 'At least one subcategory is required'),
+  });
+  const initialValues = {
+    categoryName: '',
+    subcategories: [''],
   };
 
-  const handleAddSubcategory = () => {
-    setSubcategories([...subcategories, '']);
-  };
-
-  const handleRemoveSubcategory = (index: number) => {
-    const updatedSubcategories = subcategories.filter((_, i) => i !== index);
-    setSubcategories(updatedSubcategories);
-  };
-
-  const handleSave = () => {
-    onSave({ categoryName, subcategories });
+  interface user {
+    id: string;
+    name: string;
+    email: string;
+  }
+  
+  const handleSubmit = async (values: typeof initialValues) => {
+    try {
+      const user: user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '') : { id: '', name: '', email: '' };
+      const formData = { ...values, userId: user.id};
+  
+      const response = await axios.post('http://localhost:3000/api/categories/create', formData);
+      console.log('Response:', response.data);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Account creation failed:', error);
+    }
+    onClose();
   };
 
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-Grey-80 bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 md:w-1/2 lg:w-1/3 xl:w-1/4">
-        <div className="flex flex-row justify-between">
-          <h2 className="text-lg font-bold mb-4">Add Category</h2>
+      <div className="bg-white rounded-lg p-6 md:w-1/2 lg:w-1/3 xl:w-1/4 shadow-lg">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-bold">Add Category</h2>
           <IoCloseCircleOutline
-            className="w-6 h-6 font-bold text-lg text-Grey-80 hover:text-primary"
+            className="w-6 h-6 text-Grey-80 hover:text-primary cursor-pointer"
             onClick={onClose}
+            aria-label="Close"
           />
         </div>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-Grey-100 font-semibold">Category Name</label>
-            <input
-              type="text"
-              className="w-full font-semibold text-lg border-2 rounded-lg p-2 mt-1 focus:border-primary focus:outline-none"
-              value={categoryName}
-              placeholder="Enter Category Name"
-              onChange={(e) => setCategoryName(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block font-semibold text-Grey-100 mb-2">Subcategories</label>
-            {subcategories.map((subcategory, index) => (
-              <div key={index} className="flex items-center space-x-2 mb-2">
-                <input
+        <Formik
+          initialValues={{ categoryName: '', subcategories: [] }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ values, isSubmitting }) => (
+            <Form className="space-y-4">
+              <div>
+                <label htmlFor="categoryName" className="block text-Grey-100 font-semibold">
+                  Category Name
+                </label>
+                <Field
                   type="text"
-                  className="w-full font-semibold text-lg border-2 rounded-lg p-2 focus:border-primary focus:outline-none"
-                  value={subcategory}
-                  placeholder="Enter Subcategory Name"
-                  onChange={(e) => handleSubcategoryChange(index, e.target.value)}
+                  id="categoryName"
+                  name="categoryName"
+                  className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                  placeholder="Enter Category Name"
                 />
-                {subcategories.length > 1 && (
-                  <button
-                    className="text-red-500 hover:text-red-700"
-                    onClick={() => handleRemoveSubcategory(index)}
-                  >
-                    <AiOutlineMinus className="w-6 h-6" />
-                  </button>
-                )}
+                <div className="h-5">
+                  <ErrorMessage
+                    name="categoryName"
+                    component="div"
+                    className="text-Red font-accent font-bold text-sm"
+                  />
+                </div>
               </div>
-            ))}
-            <button
-              onClick={handleAddSubcategory}
-              className="flex items-center font-semibold text-primary hover:text-Grey-100 mt-2"
-            >
-              <AiOutlinePlus className="w-5 h-5 mr-1 font-semibold" />
-              Add Subcategory
-            </button>
-          </div>
-          <button
-            onClick={handleSave}
-            className="w-full py-2 bg-primary text-white rounded-lg font-medium mt-4"
-          >
-            Save
-          </button>
-        </div>
+
+              <div>
+                <label className="block text-Grey-100 font-semibold mb-2">Subcategories</label>
+                <FieldArray name="subcategories">
+                  {({ push, remove }) => (
+                    <>
+                      {values.subcategories.map((_subcategory, index) => (
+                        <div key={index} className="flex items-center space-x-2 mb-2">
+                          <Field
+                            name={`subcategories[${index}]`}
+                            type="text"
+                            className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                            placeholder="Enter Subcategory Name"
+                          />
+                          {values.subcategories.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => remove(index)}
+                              className="text-red-500 hover:text-red-700"
+                              aria-label="Remove subcategory"
+                            >
+                              <AiOutlineMinus className="w-6 h-6" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => push('')}
+                        className="flex items-center text-primary hover:text-Grey-100 mt-2"
+                        aria-label="Add subcategory"
+                      >
+                        <AiOutlinePlus className="w-5 h-5 mr-1" />
+                        Add Subcategory
+                      </button>
+                    </>
+                  )}
+                </FieldArray>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-primary text-white py-2 rounded-lg hover:bg-green-700 transition"
+              >
+                {isSubmitting ? 'Saving...' : 'Save'}
+              </button>
+            </Form>
+          )}
+        </Formik>
       </div>
     </div>
   );
