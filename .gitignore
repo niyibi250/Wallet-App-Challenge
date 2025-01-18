@@ -30,7 +30,6 @@ frontend/.env.production
 
 # Backend Specific
 backend/node_modules/
-backend/dist/
 backend/.env.local
 backend/.env
 backend/.env.development
