@@ -80,7 +80,9 @@ const HomePage = () => {
             Say goodbye to stress and confusion when managing your finances! Our service offers simple and effective control over your finances, making financial management truly easy and convenient.
           </p>
           <div className="flex">
-            <button className="bg-primary text-Grey-5 font-bold px-6 py-3 rounded-lg hover:bg-white hover:border-2 hover:border-primary hover:text-primary  flex items-center gap-2">
+            <button 
+            onClick={()=>navigate('/signup')} 
+            className="bg-primary text-Grey-5 font-bold px-6 py-3 rounded-lg hover:bg-white hover:border-2 hover:border-primary hover:text-primary  flex items-center gap-2">
               Get started for free
               <FaArrowRight/>
             </button>

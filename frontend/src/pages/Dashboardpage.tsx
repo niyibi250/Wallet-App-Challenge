@@ -6,13 +6,12 @@ import CustomButton from "../components/CustomButton";
 import Dropdown from "../components/Dropdawn"
 import { IoMdAdd } from "react-icons/io";
 import TransactionsList from "../components/TransactionsList";
-import CashSummaryCard from "../components/CashSummaryCard";
-
+import { useState } from "react";
+import AddTransactiontable from "../components/transaction/AddTransaction";
 
 function Dashboardpage() {
-    const handleSelect = (value: string) => {
-        console.log("Selected value:", value);
-      };
+    const [showAddTransaction, setShowAddTransaction] = useState(false);
+
   return (
     <div className=" p-8">
         <div className=" flex flex-row items-center justify-between mb-5">
@@ -21,13 +20,14 @@ function Dashboardpage() {
                 <Dropdown 
                 options={['This week', 'Last week']}
                 placeholder="This week"
-                onSelect={handleSelect}/>
+                />
                 <CustomButton
                 title='Add transaction'
                 containerstyle=' py-2 px-8 text-Grey-5  bg-primary rounded-lg hover:bg-white hover:text-Grey-80 border border-primary'
                 textstyle='text-lg font-medium'
                 iconstyle='text-lg font-medium pr-2'
                 icon={<IoMdAdd/>}
+                handlepress={() => setShowAddTransaction(true)}
                 />
             </div>
         </div>
@@ -75,6 +75,7 @@ function Dashboardpage() {
                     <TransactionsList/>
                 </div>
         </div>
+        {showAddTransaction && <AddTransactiontable onClose={()=>setShowAddTransaction(false)} onSave={()=>setShowAddTransaction(false)}/> }
     </div>
   )
 }

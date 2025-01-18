@@ -38,7 +38,7 @@ const CategoryBudgets = () => {
       <div className="w-full max-w-none bg-white rounded-lg shadow-lg border p-4">
         {/* Header */}
         <div className="flex justify-between items-center border-b pb-3 mb-4">
-          <h3 className="font-bold font-accent text-Grey-80 text-lg">Categories</h3>
+          <h3 className="font-bold font-accent text-Grey-80 text-lg">Spend Progress</h3>
           <button className="p-1 hover:border hover:border-primary rounded-full text-Grey-80">
             <FiMoreVertical/>
           </button>

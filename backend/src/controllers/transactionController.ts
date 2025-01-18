@@ -3,38 +3,38 @@ import { Transaction } from '../models/Transaction';
 
 // Interface for creating a transaction
 export interface CreateTransactionRequestBody {
-    userid: string;
-    type: 'income' | 'expense'; // Type of transaction (e.g., 'income' or 'expense')
-    amount: number;             // Amount of the transaction
-    accountid: string;          // Associated account ID for the transaction
-    categoryid?: string;        // Optional category ID for the transaction
-    description?: string;       // Optional description for the transaction
-    date?: Date;                // Optional transaction date
+    userId: string;
+    type: 'income' | 'expense';
+    amount: number;
+    accountName: string;
+    categoryName?: string;
+    description?: string;
+    date?: Date;
 }
 
 // Interface for updating a transaction
 export interface UpdateTransactionRequestBody {
-    type?: 'income' | 'expense'; // Optional update for transaction type
-    amount?: number;             // Optional update for transaction amount
-    accountid?: string;          // Optional update for associated account
-    categoryid?: string;         // Optional update for transaction category
-    description?: string;        // Optional update for transaction description
-    date?: Date;                 // Optional update for transaction date
+    type?: 'income' | 'expense';
+    amount?: number;
+    accountName?: string;
+    categoryName?: string;
+    description?: string;
+    date?: Date;
 }
 
 // Create a transaction
 export const createTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { userid, type, amount, accountid, categoryid, description, date } = req.body as CreateTransactionRequestBody;
+        const { userId, type, amount, accountName, categoryName, description, date } = req.body as CreateTransactionRequestBody;
 
-        const transaction = new Transaction({ 
-            userid, 
-            type, 
-            amount, 
-            accountid, 
-            categoryid, 
-            description, 
-            date: date || new Date() 
+        const transaction = new Transaction({
+            userId,
+            type,
+            amount,
+            accountName,
+            categoryName,
+            description,
+            date: date || new Date(),
         });
 
         await transaction.save();
@@ -47,9 +47,9 @@ export const createTransaction = async (req: Request, res: Response): Promise<vo
 // Get all transactions for a user
 export const getTransactions = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { userid } = req.body;
+        const { userId } = req.body;
 
-        const transactions = await Transaction.find({ userid });
+        const transactions = await Transaction.find({ userId });
         res.status(200).json({ success: true, transactions });
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
@@ -60,6 +60,7 @@ export const getTransactions = async (req: Request, res: Response): Promise<void
 export const updateTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
+
         const updatedTransaction = await Transaction.findByIdAndUpdate(id, req.body as UpdateTransactionRequestBody, { new: true });
 
         if (!updatedTransaction) {
@@ -77,6 +78,7 @@ export const updateTransaction = async (req: Request, res: Response): Promise<vo
 export const deleteTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
+
         const deletedTransaction = await Transaction.findByIdAndDelete(id);
 
         if (!deletedTransaction) {

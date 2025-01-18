@@ -15,7 +15,7 @@ function DashboardLayout() {
                 <div className="pl-8">
                     <Navbar/>
                 </div>
-                <div className="">
+                <div className="flex flex-row items-center pl-8 mb-4">
                     <Logout/>
                 </div>
             </div>

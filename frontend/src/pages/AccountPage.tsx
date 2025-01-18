@@ -1,11 +1,14 @@
+import { useState } from "react";
 import AccountCard from "../components/accounts/AccountCard";
 import TransactionTable from "../components/accounts/TransactionTable";
 import CustomButton from "../components/CustomButton";
 import { IoMdAdd } from "react-icons/io";
-
+import AddAccountTable from "../components/accounts/AddAcount";
+import AddExpenseCategory from "../components/accounts/AddExpenseCategory";
 
 function Accountpage() {
-    
+    const [showAddAccount, setShowAddAccount] = useState(false);
+    const [showAddCategory, setShowAddCategory] = useState(false);
   return (
     <div className=" p-8">
         <div className=" flex flex-row items-center justify-between mb-5">
@@ -17,6 +20,7 @@ function Accountpage() {
                     textstyle='text-lg text-Grey-80 font-medium'
                     iconstyle='text-lg text-Grey-80 font-medium pr-2'
                     icon={<IoMdAdd/>}
+                    handlepress={() => setShowAddCategory(true)}
                 />
                 <CustomButton
                     title='Add Account'
@@ -24,6 +28,7 @@ function Accountpage() {
                     textstyle='text-lg font-medium'
                     iconstyle='text-lg font-medium pr-2 '
                     icon={<IoMdAdd/>}
+                    handlepress={() => setShowAddAccount(true)}
                 />
             </div>
         </div>
@@ -68,6 +73,8 @@ function Accountpage() {
                     <TransactionTable/>
                 </div>
         </div>
+        {showAddAccount && <AddAccountTable onClose={()=>setShowAddAccount(false)} onSave={()=>setShowAddAccount(false)}/> }
+        {showAddCategory && <AddExpenseCategory onClose={()=>setShowAddCategory(false)} onSave={()=>setShowAddCategory(false)}/> }
     </div>
   )
 }

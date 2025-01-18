@@ -1,69 +1,154 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Formik, Field, ErrorMessage, Form, FormikHelpers } from 'formik';
+import * as Yup from 'yup';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../../store';
+import { registerUser } from '../../features/auth/SignupSlice';
+
+interface FormValues {
+  name: string;
+  email: string;
+  password: string;
+}
+
 const Signupform = () => {
-    const navigate = useNavigate();
+  const dispatch: AppDispatch = useDispatch();
+  const signUpState = useSelector((state: RootState) => state.signUp);
+  const navigate = useNavigate();
+  const [passwordVisible, setPasswordVisible] = useState(false);
+
+  const validationSchema = Yup.object().shape({
+    username: Yup.string().required('Username is required'),
+    email: Yup.string().email('Invalid email').required('Email is required'),
+    password: Yup.string()
+      .min(8, 'Password must be at least 8 characters')
+      .required('Password is required'),
+  });
+
+  const handleSubmit = (
+    values: FormValues,
+    actions: FormikHelpers<FormValues>
+  ) => {
+    dispatch(registerUser(values))
+      .then(() => {
+        actions.setSubmitting(false);
+        navigate('/login');
+      })
+      .catch(() => {
+        actions.setSubmitting(false);
+      });
+  };
+
   return (
-        <div className="bg-white p-8 shadow-lg w-full max-w-md h-full">
-            <h1 className="text-3xl font-bold text-primary text-center">
-            Money<br />Minder
-            </h1>
-            <h2 className="text-xl text-Grey-80 font-accent font-bold text-start mb-4">Login</h2>
-            <form className="space-y-5 h-full flex flex-col justify-center">
-                <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-600">
-                    UserName
-                    </label>
-                    <input
-                    type="Username"
-                    id="username"
-                    className="w-full mt-1 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
-                    placeholder="Enter your username"
-                    required
-                    />
-                </div>
-                <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-600">
-                    Email
-                    </label>
-                    <input
-                    type="email"
-                    id="email"
-                    className="w-full mt-1 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
-                    placeholder="Enter your email"
-                    required
-                    />
-                </div>
-                <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-600">
-                    Password
-                    </label>
-                    <input
-                    type="password"
-                    id="password"
-                    className="w-full mt-1 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
-                    placeholder="Enter your password"
-                    required
-                    />
-                </div>
+    <div className="bg-white p-8 shadow-lg w-full h-full">
+      <h1 className="text-3xl font-bold text-primary text-center">
+        Money<br />Minder
+      </h1>
+      <h2 className="text-xl text-Grey-80 mb-4 font-bold text-start">Sign Up</h2>
+      <Formik
+        initialValues={{ name: '', email: '', password: '' }}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+      >
+        {({ isSubmitting }) => (
+          <Form className="space-y-4 flex flex-col justify-center">
+            <div>
+              <label htmlFor="username" className="block text-Grey-80 font-semibold">
+                Username
+              </label>
+              <Field
+                type="text"
+                id="username"
+                name="username"
+                className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                placeholder="Enter your username"
+              />
+              <div className="h-5">
+                <ErrorMessage
+                  name="username"
+                  component="div"
+                  className="text-Red font-accent font-bold text-sm"
+                />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="email" className="block text-Grey-80 font-semibold">
+                Email
+              </label>
+              <Field
+                type="email"
+                id="email"
+                name="email"
+                className="w-full mt-1 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                placeholder="Enter your email"
+              />
+              <div className="h-5">
+                <ErrorMessage
+                  name="email"
+                  component="div"
+                  className="text-Red font-accent font-bold text-sm"
+                />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-Grey-80 font-semibold">
+                Password
+              </label>
+              <div className="relative">
+                <Field
+                  type={passwordVisible ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  className="w-full mt-1 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                  placeholder="Enter your password"
+                />
                 <button
-                    type="submit"
-                    className="w-full bg-primary text-white py-2 rounded-lg hover:bg-green-700 transition"
+                  type="button"
+                  className="absolute inset-y-0 right-3 flex items-center text-Grey-80"
+                  onClick={() => setPasswordVisible(!passwordVisible)}
+                  aria-label={passwordVisible ? 'Hide password' : 'Show password'}
                 >
-                    Signup
+                  {passwordVisible ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
                 </button>
-            </form>
-            <div className="flex items-center my-6">
-                <hr className="flex-grow border-1 border-Grey-50 mt-4" />
+              </div>
+              <div className="h-5">
+                <ErrorMessage
+                  name="password"
+                  component="div"
+                  className="text-Red font-accent font-bold text-sm"
+                />
+              </div>
             </div>
-            <div className="flex justify-center space-x-4">
-               <div className="font-bold text-Grey-80 text-xl font-accent mx-6">Stay in control of your finances.</div>
-            </div>
-            <p className="text text-center text-gray-600 mt-6">
-                You have an account yet?{" "}
-                <a onClick={()=>navigate('/login')} className="text-primary hover:border-b-2 hover:border-primary">
-                    Login
-                </a>
-            </p>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-primary text-white py-2 rounded-lg hover:bg-green-700 transition"
+            >
+              {isSubmitting ? 'Submitting...' : 'Sign Up'}
+            </button>
+          </Form>
+        )}
+      </Formik>
+      <div className="flex items-center">
+        <hr className="flex-grow border-1 border-gray-200" />
+      </div>
+      <div className="flex justify-center space-x-4">
+        <div className="font-bold text-gray-800 text-xl mx-6 mt-4">
+          Stay in control of your finances.
         </div>
+      </div>
+      <p className="text-center text-Grey-80">
+        Already have an account?{' '}
+        <a
+          onClick={() => navigate('/login')}
+          className="text-primary cursor-pointer hover:border-b-2 hover:border-primary"
+        >
+          Login
+        </a>
+      </p>
+    </div>
   );
 };
 

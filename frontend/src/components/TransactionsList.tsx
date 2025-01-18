@@ -3,8 +3,19 @@ import { GoLightBulb } from "react-icons/go";
 import { FiDollarSign } from "react-icons/fi";
 import { FiMoreVertical } from "react-icons/fi";
 import { useState } from "react";
+import UpdateTransactionCard from "./transaction/updatetransaction";
 
+interface transactionDetails {
+  id: string;
+  transactionType: string;
+  name: string;
+  category: string;
+  account: string;
+  amount: string;
+  date: string;
+};
 const TransactionsList = () => {
+  const [showUpdateTransaction, setShowUpdateTransaction] = useState(false);
   const allTransactions = [
     {
       id: 1,
@@ -162,9 +173,25 @@ const TransactionsList = () => {
               </div>
               <div className="flex items-center justify-between text-gray-600">
                 <span>{transaction.payment}</span>
-                <button className="p-1 hover:bg-gray-100 rounded-full">
-                  <FiMoreVertical className="h-4 w-4" />
-                </button>
+                <div className="relative">
+                  <button
+                    className="p-1 hover:bg-gray-100 rounded-full"
+                    onClick={(e) => {
+                      const menu = e.currentTarget.nextElementSibling;
+                      menu?.classList.toggle("hidden");
+                    }}
+                  >
+                    <FiMoreVertical className="h-4 w-4" />
+                  </button>
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10 hidden">
+                    <button className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
+                      Update
+                    </button>
+                    <button className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
+                      Delete
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           ))}
@@ -185,9 +212,9 @@ const TransactionsList = () => {
           ))}
         </div>
       </div>
+       {showUpdateTransaction && <UpdateTransactionCard transactionDetails={selectedTransaction} onClose={()=>setShowUpdateTransaction(false)} onUpdate={()=>setShowUpdateTransaction(false)}/> }
     </div>
   );
 };
 
 export default TransactionsList;
-
