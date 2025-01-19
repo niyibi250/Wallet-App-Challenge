@@ -15,7 +15,7 @@ const Dropdown: React.FC<DropdownProps> = ({ options, placeholder, onSelect }) =
 
   const handleSelect = (option: string) => {
     setSelectedOption(option);
-    onSelect(option);
+    onSelect?.(option);
     setIsOpen(false);
   };
 
@@ -51,3 +51,4 @@ const Dropdown: React.FC<DropdownProps> = ({ options, placeholder, onSelect }) =
 };
 
 export default Dropdown;
+

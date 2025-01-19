@@ -20,11 +20,6 @@ ChartJS.register(
   Legend
 );
 
-interface CurrentPrevMonthExpenseResult {
-  currentMonthExpenses: number[];
-  prevMonthExpenses: number[];
-  categories: string[];
-}
 const ExpensesCompared = () => {
   const { transactions } = useTransactions();
   const { currentMonthExpenses, prevMonthExpenses, categories } = calculateCategoryExpensesCurrentPrevMonth(transactions);
@@ -51,7 +46,7 @@ const ExpensesCompared = () => {
     responsive: true,
     plugins: {
       legend: {
-        position: "top",
+        position: "top" as const,
         labels: {
           color: "#4a5568",
           font: {

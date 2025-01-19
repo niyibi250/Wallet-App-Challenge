@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Formik, Field, ErrorMessage, Form, FormikHelpers } from 'formik';
+import { Formik, Field, ErrorMessage, Form} from 'formik';
 import * as Yup from 'yup';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import axios from 'axios';
@@ -23,10 +23,11 @@ const Signupform = () => {
       .min(8, 'Password must be at least 8 characters')
       .required('Password is required'),
   });
-
+  // const url = 'http://localhost:3000/api'
+  const url = 'https://wallet-app-challenge-backend.onrender.com/api'
   const handleSubmit = async (values: FormValues) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/users/register', values);
+      const response = await axios.post(`${url}/users/register`, values);
       console.log('Response:', response.data);
       navigate('/login');
     } catch (error) {

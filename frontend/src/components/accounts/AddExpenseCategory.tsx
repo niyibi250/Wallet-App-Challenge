@@ -1,4 +1,3 @@
-import React from 'react';
 import { IoCloseCircleOutline } from 'react-icons/io5';
 import { AiOutlinePlus, AiOutlineMinus } from 'react-icons/ai';
 import { Formik, Field, Form, ErrorMessage, FieldArray } from 'formik';
@@ -18,7 +17,7 @@ interface AddExpenseCategoryCardProps {
   }) => void;
 }
 
-const AddExpenseCategory = ({ onClose, onSave }: AddExpenseCategoryCardProps) => {
+const AddExpenseCategory = ({ onClose}: AddExpenseCategoryCardProps) => {
   const navigate = useNavigate();
   const validationSchema = Yup.object().shape({
     categoryName: Yup.string().required('Category name is required'),
@@ -36,13 +35,14 @@ const AddExpenseCategory = ({ onClose, onSave }: AddExpenseCategoryCardProps) =>
     name: string;
     email: string;
   }
-  
+  // const url = 'http://localhost:3000/api'
+  const url = 'https://wallet-app-challenge-backend.onrender.com/api'
   const handleSubmit = async (values: typeof initialValues) => {
     try {
       const user: user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '') : { id: '', name: '', email: '' };
       const formData = { ...values, userId: user.id};
   
-      const response = await axios.post('http://localhost:3000/api/categories/create', formData);
+      const response = await axios.post(`${url}/categories/create`, formData);
       console.log('Response:', response.data);
       navigate('/dashboard');
     } catch (error) {

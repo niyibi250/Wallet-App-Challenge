@@ -1,4 +1,3 @@
-import React from 'react';
 import { IoCloseCircleOutline } from 'react-icons/io5';
 import { Formik, Field, ErrorMessage, Form } from 'formik';
 import * as Yup from 'yup';
@@ -39,13 +38,14 @@ const AddAccountTable = ({ onClose, onSave }: AddAccountCardProps) => {
     name: string;
     email: string;
   }
-
+  // const url = 'http://localhost:3000/api'
+  const url = 'https://wallet-app-challenge-backend.onrender.com/api'
   const handleSubmit = async (values: typeof initialValues) => {
     try {
       const user: user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '') : { id: '', name: '', email: '' };
       const formData = { ...values, userid: user.id};
   
-      const response = await axios.post('http://localhost:3000/api/accounts/create', formData);
+      const response = await axios.post( `${url}/accounts/create`, formData);
       console.log('Response:', response.data);
       navigate('/dashboard');
     } catch (error) {

@@ -8,7 +8,7 @@ import { useAccount } from "../utils/AccountContext";
 const CardManagement = () => {
   const [showAddAccount, setShowAddAccount] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { account, loading, error } = useAccount();
+  const { account} = useAccount();
 
   const prevCard = () => {
     if (account.length > 1) {
@@ -22,13 +22,6 @@ const CardManagement = () => {
     }
   };
 
-  if (loading) {
-    return <p>Loading accounts...</p>;
-  }
-
-  if (error) {
-    return <p>Error: {error}</p>;
-  }
 
   return (
     <div className="w-full h-full bg-white rounded-xl px-10 py-5">
@@ -103,7 +96,28 @@ const CardManagement = () => {
           </div>
         </>
       ) : (
-        <p>No accounts available.</p>
+        <div className="space-y-3 font-accent text-Grey-80 font-semibold border-t">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Account Name</span>
+            <span className="font-medium">
+              <div className="h-4 w-32 bg-gray-200 rounded"></div>
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Account Type</span>
+            <span className="font-medium">
+              <div className="h-4 w-32 bg-gray-200 rounded"></div>
+            </span>
+          </div>
+          <div className="pt-2">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Account Balance</span>
+              <span className="font-medium">
+                <div className="h-4 w-32 bg-gray-200 rounded"></div>
+              </span>
+            </div>
+          </div>
+        </div>
       )}
 
       {showAddAccount && <AddAccountTable onClose={() => setShowAddAccount(false)} onSave={() => setShowAddAccount(false)} />}

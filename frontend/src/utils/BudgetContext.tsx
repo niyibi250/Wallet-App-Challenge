@@ -46,12 +46,14 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
   const fetchBudgets = async () => {
     setLoading(true);
     setError(null);
+    // const url = 'http://localhost:3000/api'
+    const url = 'https://wallet-app-challenge-backend.onrender.com/api'
     try {
       const user: User = localStorage.getItem('user') 
         ? JSON.parse(localStorage.getItem('user') || '{}') 
         : { id: '', name: '', email: '' };
       const userId = user.id;
-      const response = await axios.get('http://localhost:3000/api/budgets', { params: { userId } });
+      const response = await axios.get(`${url}/budgets`, { params: { userId } });
       setBudgets(response.data);
     } catch (err) {
       setError('Failed to fetch budgets');

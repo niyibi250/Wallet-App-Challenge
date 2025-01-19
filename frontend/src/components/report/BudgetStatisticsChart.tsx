@@ -1,4 +1,3 @@
-import React from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -44,7 +43,7 @@ const BudgetStatisticsChart = () => {
     responsive: true,
     plugins: {
       legend: {
-        position: "top",
+        position: "top" as const,
         labels: {
           color: "#4a5568",
           font: {
@@ -65,7 +64,7 @@ const BudgetStatisticsChart = () => {
       y: {
         ticks: {
           color: "#4a5568",
-          callback: (value: number) => `$${value}`,
+          callback: (tickValue: string | number) => `$${tickValue}`,
         },
         beginAtZero: true,
         title: {
@@ -92,4 +91,5 @@ const BudgetStatisticsChart = () => {
 };
 
 export default BudgetStatisticsChart;
+
 

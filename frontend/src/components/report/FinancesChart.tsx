@@ -1,4 +1,3 @@
-import React from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -8,7 +7,7 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 } from 'chart.js';
 
 // Register ChartJS components
@@ -33,7 +32,7 @@ const FinancesChart = () => {
         backgroundColor: '#3B82F6',
         tension: 0.4,
         pointRadius: 0,
-        borderWidth: 2
+        borderWidth: 2,
       },
       {
         label: 'Expenses',
@@ -42,7 +41,7 @@ const FinancesChart = () => {
         backgroundColor: '#FB923C',
         tension: 0.4,
         pointRadius: 0,
-        borderWidth: 2
+        borderWidth: 2,
       },
       {
         label: 'Savings',
@@ -51,9 +50,9 @@ const FinancesChart = () => {
         backgroundColor: '#22C55E',
         tension: 0.4,
         pointRadius: 0,
-        borderWidth: 2
-      }
-    ]
+        borderWidth: 2,
+      },
+    ],
   };
 
   const options = {
@@ -62,37 +61,37 @@ const FinancesChart = () => {
     scales: {
       x: {
         grid: {
-          display: false
+          display: false,
         },
         border: {
-          display: false
+          display: false,
         },
         ticks: {
-          color: '#6B7280'
-        }
+          color: '#6B7280',
+        },
       },
       y: {
         grid: {
           color: '#E5E7EB',
           drawBorder: false,
-          borderDash: [3, 3]
+          borderDash: [3, 3],
         },
         border: {
-          display: false
+          display: false,
         },
         ticks: {
           color: '#6B7280',
-          callback: (value:any) => `$ ${value}`,
+          callback: (value: any) => `$ ${value}`,
           stepSize: 2000,
-          max: 10000
-        }
-      }
+          max: 10000,
+        },
+      },
     },
     plugins: {
       legend: {
         display: true,
-        position: 'top',
-        align: 'end',
+        position: 'top' as const,
+        align: 'end' as const, // Updated: Correct align value
         labels: {
           boxWidth: 8,
           boxHeight: 8,
@@ -100,8 +99,8 @@ const FinancesChart = () => {
           usePointStyle: true,
           pointStyle: 'circle',
           padding: 20,
-          color: '#6B7280'
-        }
+          color: '#6B7280',
+        },
       },
       tooltip: {
         backgroundColor: '#1F2937',
@@ -112,23 +111,23 @@ const FinancesChart = () => {
         boxWidth: 10,
         boxHeight: 10,
         usePointStyle: true,
-        mode: 'index',
+        mode: 'index' as const,
         intersect: false,
         callbacks: {
-          label: function(context:any) {
+          label: function (context: any) {
             return `${context.dataset.label}: $ ${context.parsed.y}`;
-          }
-        }
-      }
+          },
+        },
+      },
     },
     interaction: {
-      mode: 'index',
-      intersect: false
+      mode: 'index' as const,
+      intersect: false,
     },
     hover: {
-      mode: 'index',
-      intersect: false
-    }
+      mode: 'index' as const,
+      intersect: false,
+    },
   };
 
   return (
@@ -141,4 +140,3 @@ const FinancesChart = () => {
 };
 
 export default FinancesChart;
-

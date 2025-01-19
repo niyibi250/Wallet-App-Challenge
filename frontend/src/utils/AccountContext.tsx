@@ -38,10 +38,12 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
   const fetchAccount = async () => {
     setLoading(true);
     setError(null);
+    // const url = 'http://localhost:3000/api'
+    const url = 'https://wallet-app-challenge-backend.onrender.com/api'
     try {
       const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '') : { userid: '' };
       const userId = user.id;
-      const response = await axios.get('http://localhost:3000/api/accounts/accounts', { params: { userId } });
+      const response = await axios.get(`${url}/accounts/accounts`, { params: { userId } });
 
       if (response.data.success) {
         setAccount(response.data.accounts);

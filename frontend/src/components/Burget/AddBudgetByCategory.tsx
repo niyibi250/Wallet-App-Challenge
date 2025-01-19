@@ -55,12 +55,13 @@ const AddBudget = ({ onClose, onSave }: AddBudgetProps) => {
     startDate: null,
     endDate: null,
   };
-
+  // const url = 'http://localhost:3000/api'
+  const url = 'https://wallet-app-challenge-backend.onrender.com/api'
   const handleSubmit = async (values: BudgetValues) => {
     try {
       const user: user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '') : { id: '', name: '', email: '' };
       const formData = { ...values, userId: user.id};
-      const response = await axios.post(`http://localhost:3000/api/budgets/`, formData);
+      const response = await axios.post(`${url}/budgets/`, formData);
       console.log('Response:', response.data);
       navigate('/dashboard');
     } catch (error) {

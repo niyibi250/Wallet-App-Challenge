@@ -43,10 +43,12 @@ export const TransactionsProvider: React.FC<TransactionsProviderProps> = ({ chil
   const fetchTransactions = async () => {
     setLoading(true);
     setError(null);
+    // const url = 'http://localhost:3000/api'
+    const url = 'https://wallet-app-challenge-backend.onrender.com/api'
     try {
       const user: user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '') : { id: '', name: '', email: '' };
       const userId = user.id;
-      const response = await axios.get('http://localhost:3000/api/transactions/', {params: { userId }});
+      const response = await axios.get(`${url}/transactions/`, {params: { userId }});
       setTransactions(response.data.transactions);
     } catch (err) {
       setError('Failed to fetch transactions');

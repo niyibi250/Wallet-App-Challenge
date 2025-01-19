@@ -39,10 +39,12 @@ export const CategoriesProvider: React.FC<CategoriesProviderProps> = ({ children
   const fetchCategories = async () => {
     setLoading(true);
     setError(null);
+    // const url = 'http://localhost:3000/api'
+    const url = 'https://wallet-app-challenge-backend.onrender.com/api'
     try {
       const user: user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '') : { id: '', name: '', email: '' };
       const userId = user.id;
-      const response = await axios.get('http://localhost:3000/api/categories/getcategories',{params: { userId }});
+      const response = await axios.get(`${url}/categories/getcategories`,{params: { userId }});
       setCategories(response.data.categories);
     } catch (err) {
       setError('Failed to fetch categories');

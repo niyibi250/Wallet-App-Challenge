@@ -12,15 +12,6 @@ interface Transaction {
     __v: number;
   }
   
-  interface TransactionValues {
-  userId: string;
-  accountName: string;
-  type: string;
-  amount: string;
-  categoryName: string;
-  description: string;
-  date: Date | null;
-}
   interface ExpenseResult {
     categoryName: string;
     totalAmount: number;

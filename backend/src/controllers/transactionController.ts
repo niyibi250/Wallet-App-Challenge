@@ -5,7 +5,7 @@ import { User } from '../models/User';
 // Interface for creating a transaction
 export interface CreateTransactionRequestBody {
     userId: string;
-    type: 'income' | 'expense';
+    type: 'income' | 'expense' | 'saving';
     amount: number;
     accountName: string;
     categoryName?: string;
@@ -42,7 +42,7 @@ export const createTransaction = async (req: Request, res: Response): Promise<vo
         await transaction.save();
         res.status(201).json({ success: true, transaction });
     } catch (error: any) {
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: error });
     }
 };
 

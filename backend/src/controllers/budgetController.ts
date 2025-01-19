@@ -21,7 +21,7 @@ export interface UpdateBudgetRequestBody {
 export const createBudget = async (req: Request, res: Response) => {
     try {
         const { userId, categoryName, amount, startDate, endDate } = req.body as CreateBudgetRequestBody;
-        const burgetexists = await Budget.find({ categoryName });
+        const burgetexists = await Budget.findOne({ categoryName: categoryName });
         if (burgetexists) {
             res.status(400).json({ success: false, message: 'Budget already exists' });
             return

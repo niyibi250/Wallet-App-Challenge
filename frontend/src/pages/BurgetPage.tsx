@@ -1,7 +1,6 @@
 import CustomButton from "../components/CustomButton";
 import Dropdown from "../components/Dropdawn"
 import { IoMdAdd } from "react-icons/io";
-import BudgetProgressCard from "../components/Burget/BurgetProgressCard";
 import CategoryBudgets from "../components/Burget/CategoriesBurget";
 import BudgetStatistics from "../components/Burget/BudgetStatistics";
 import AddBudget from '../components/Burget/AddBudgetByCategory';

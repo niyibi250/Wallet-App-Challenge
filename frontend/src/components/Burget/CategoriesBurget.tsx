@@ -1,10 +1,6 @@
 import { FiMoreVertical, FiTrash2 } from "react-icons/fi";
-import { useBudgets } from "../../utils/BudgetContext";
-import calculateTotalExpense from '../../utils/calculateTotalExpense';
-import { useTransactions } from '../../utils/TransactionsContext';
 const CategoryBudgets = () => {
-  const { budgets } = useBudgets();
-  const { transactions } = useTransactions();
+
  
   // Processing Each Budget
 // const results = budgets.map(budget => {
