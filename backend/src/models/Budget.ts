@@ -2,7 +2,9 @@ import { Schema, model, Document } from 'mongoose';
 
 const BudgetSchema = new Schema(
     {
-        amount: {type: Number,required: true,min: [0, 'Budget amount must be a positive number']},
+        userId: { type: String, required: true },
+        categoryName: { type: String, required: true },
+        amount: {type: Number,required: true},
         startDate: {type: Date,required: true},
         endDate: {type: Date,required: true},
     },

@@ -1,67 +1,24 @@
 import { useState } from 'react';
-import { IoChevronDown } from "react-icons/io5";
+import { useTransactions } from '../../utils/TransactionsContext';
 
 const TransactionTable = () => {
+  const { transactions } = useTransactions();
   const [currentPage, setCurrentPage] = useState(1);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('All');
   const transactionsPerPage = 8;
-
-  const transactions = [
-    {
-      account: "Monobank",
-      category: "Groceries",
-      date: "Apr 15, 2024",
-      amount: -570,
-    },
-    {
-      account: "Monobank",
-      category: "Uncategorized",
-      date: "Apr 15, 2024",
-      amount: 5560,
-    },
-    {
-      account: "Wise",
-      category: "Beauty",
-      date: "Apr 15, 2024",
-      amount: -533,
-    },
-    {
-      account: "Privatbank",
-      category: "Transport",
-      date: "Apr 14, 2024",
-      amount: -59,
-    },
-    {
-      account: "Revolut",
-      category: "Uncategorized",
-      date: "Apr 14, 2024",
-      amount: 5700,
-    },
-    {
-      account: "Revolut",
-      category: "Pets",
-      date: "Apr 13, 2024",
-      amount: -556,
-    },
-    {
-      account: "Pumb",
-      category: "Hobby",
-      date: "Apr 11, 2024",
-      amount: -540,
-    },
-    {
-      account: "Wise",
-      category: "Subscription",
-      date: "Apr 11, 2024",
-      amount: -510,
-    },
-  ];
 
   const totalPages = Math.ceil(transactions.length / transactionsPerPage);
   const indexOfLastTransaction = currentPage * transactionsPerPage;
   const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
-  const currentTransactions = transactions.slice(indexOfFirstTransaction, indexOfLastTransaction);
+
+  const filteredTransactions = transactions.filter(transaction => {
+    if (selectedFilter === 'All') return true;
+    if (selectedFilter === 'Income') return Number(transaction.amount) > 0;
+    if (selectedFilter === 'Expense') return Number(transaction.amount) < 0;
+    return true;
+  });
+
+  const currentTransactions = filteredTransactions.slice(indexOfFirstTransaction, indexOfLastTransaction);
 
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -71,9 +28,8 @@ const TransactionTable = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
-  const handlePeriodChange = (period: string) => {
-    setSelectedPeriod(period);
-    setIsMenuOpen(false);
+  const handleFilterChange = (filter: string) => {
+    setSelectedFilter(filter);
   };
 
   return (
@@ -85,33 +41,26 @@ const TransactionTable = () => {
           </div>
           <div className="flex flex-row justify-between items-center gap-4 mt-6">
             <div className="flex gap-4 text-sm text-Grey-80 font-accent font-bold">
-              <button className="hover:text-gray-200">All Transactions</button>
-              <button className="hover:text-gray-200">Expenses</button>
-              <button className="hover:text-gray-200">Income</button>
+              <button 
+                className={`hover:text-gray-200 ${selectedFilter === 'All' ? 'text-primary' : ''}`} 
+                onClick={() => handleFilterChange('All')}
+              >
+                All Transactions
+              </button>
+              <button 
+                className={`hover:text-gray-200 ${selectedFilter === 'Income' ? 'text-primary' : ''}`} 
+                onClick={() => handleFilterChange('Income')}
+              >
+                Income
+              </button>
+              <button 
+                className={`hover:text-gray-200 ${selectedFilter === 'Expense' ? 'text-primary' : ''}`} 
+                onClick={() => handleFilterChange('Expense')}
+              >
+                Expenses
+              </button>
             </div>
             <div className="flex items-center gap-2">
-              <div className="relative inline-block text-left bg-Grey-5 text-Grey-100 rounded-md px-2 hover:border hover:border-primary">
-                <button
-                  className="flex items-center gap-1 px-3 py-1.5 rounded"
-                  type="button"
-                  aria-haspopup="true"
-                  aria-expanded={isMenuOpen}
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                >
-                  {selectedPeriod ? selectedPeriod : 'This Month'}
-                  <IoChevronDown className='ml-10' />
-                </button>
-                {isMenuOpen && (
-                  <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                    <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu hover:bg-primary">
-                      <button className="block px-4 py-2 text-sm text-gray-700 hover:text-Grey-5 hover:bg-primary w-full text-left" role="menuitem" onClick={() => handlePeriodChange('Last Month')}>This Month</button>
-                      <button className="block px-4 py-2 text-sm text-gray-700 hover:text-Grey-5 hover:bg-primary w-full text-left" role="menuitem" onClick={() => handlePeriodChange('Last Month')}>Last Month</button>
-                      <button className="block px-4 py-2 text-sm text-gray-700 hover:text-Grey-5 hover:bg-primary w-full text-left" role="menuitem" onClick={() => handlePeriodChange('Last Quarter')}>Last Quarter</button>
-                      <button className="block px-4 py-2 text-sm text-gray-700 hover:text-Grey-5 hover:bg-primary w-full text-left" role="menuitem" onClick={() => handlePeriodChange('Last Year')}>Last Year</button>
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </div>
@@ -129,11 +78,11 @@ const TransactionTable = () => {
             <tbody>
               {currentTransactions.map((transaction, index) => (
                 <tr key={index} className="font-semibold border-b border-gray-800">
-                  <td className="py-4">{transaction.account}</td>
-                  <td>{transaction.date}</td>
-                  <td>{transaction.category}</td>
-                  <td className={transaction.amount > 0 ? "text-green-400" : "text-red-400"}>
-                    {transaction.amount > 0 ? "+" : ""}
+                  <td className="py-4">{transaction.accountName}</td>
+                  <td>{transaction.date ? new Date(transaction.date).toLocaleDateString() : ''}</td>
+                  <td>{transaction.categoryName}</td>
+                  <td className={Number(transaction.amount) > 0 ? "text-green-400" : "text-red-400"}>
+                    {Number(transaction.amount) > 0 ? "+" : ""}
                     {transaction.amount}
                   </td>
                 </tr>
@@ -144,7 +93,7 @@ const TransactionTable = () => {
 
         <div className="flex justify-between items-center mt-4 text-sm text-Grey-100">
           <div>
-            {indexOfFirstTransaction + 1}-{Math.min(indexOfLastTransaction, transactions.length)} of {transactions.length}
+            {indexOfFirstTransaction + 1}-{Math.min(indexOfLastTransaction, filteredTransactions.length)} of {filteredTransactions.length}
           </div>
           <div className="flex items-center gap-2">
             <button className="p-1 hover:bg-gray-800 rounded" onClick={handlePrevPage} disabled={currentPage === 1}>
@@ -153,7 +102,7 @@ const TransactionTable = () => {
             {[...Array(totalPages)].map((_, pageIndex) => (
               <button
                 key={pageIndex}
-                className={`px-2 py-1 hover:bg-gray-800 rounded ${currentPage === pageIndex + 1 ? "bg-gray-700" : ""}`}
+                className={`p-2 ${currentPage === pageIndex + 1 ? "bg-gray-700" : "hover:bg-gray-800"} rounded`}
                 onClick={() => setCurrentPage(pageIndex + 1)}
               >
                 {pageIndex + 1}

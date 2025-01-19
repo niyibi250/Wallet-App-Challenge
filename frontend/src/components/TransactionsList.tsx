@@ -1,120 +1,16 @@
-import { AiOutlineShoppingCart } from "react-icons/ai";
-import { GoLightBulb } from "react-icons/go";
-import { FiDollarSign } from "react-icons/fi";
 import { FiMoreVertical } from "react-icons/fi";
 import { useState } from "react";
-import UpdateTransactionCard from "./transaction/updatetransaction";
+import { useTransactions } from '../utils/TransactionsContext';
+import sortTransactionsByRecent from '../utils/sortTransactionsByRecent';
+// import UpdateTransactionCard from "./transaction/updatetransaction";
 
-interface transactionDetails {
-  id: string;
-  transactionType: string;
-  name: string;
-  category: string;
-  account: string;
-  amount: string;
-  date: string;
-};
 const TransactionsList = () => {
-  const [showUpdateTransaction, setShowUpdateTransaction] = useState(false);
-  const allTransactions = [
-    {
-      id: 1,
-      category: "Food",
-      icon: <AiOutlineShoppingCart className="h-4 w-4 text-gray-600" />,
-      datetime: "3 Dec 23 6:57 PM",
-      amount: -15.98,
-      payment: "Card **4156",
-    },
-    {
-      id: 2,
-      category: "Electricity",
-      icon: <GoLightBulb className="h-4 w-4 text-gray-600" />,
-      datetime: "3 Dec 23 2:12 PM",
-      amount: -4.12,
-      payment: "Cash",
-    },
-    {
-      id: 3,
-      category: "Salary",
-      icon: <FiDollarSign className="h-4 w-4 text-gray-600" />,
-      datetime: "3 Dec 23 10:44 AM",
-      amount: 4800,
-      payment: "Card **5230",
-    },
-    {
-      id: 4,
-      category: "Transport",
-      icon: <AiOutlineShoppingCart className="h-4 w-4 text-gray-600" />,
-      datetime: "4 Dec 23 8:30 AM",
-      amount: -25.5,
-      payment: "Card **4156",
-    },
-    {
-      id: 5,
-      category: "Groceries",
-      icon: <AiOutlineShoppingCart className="h-4 w-4 text-gray-600" />,
-      datetime: "5 Dec 23 6:20 PM",
-      amount: -50.75,
-      payment: "Cash",
-    },
-    {
-      id: 6,
-      category: "Bonus",
-      icon: <FiDollarSign className="h-4 w-4 text-gray-600" />,
-      datetime: "5 Dec 23 1:00 PM",
-      amount: 1500,
-      payment: "Bank Transfer",
-    },
-    {
-      id: 7,
-      category: "Health",
-      icon: <GoLightBulb className="h-4 w-4 text-gray-600" />,
-      datetime: "6 Dec 23 10:15 AM",
-      amount: -75.32,
-      payment: "Card **5230",
-    },
-    {
-      id: 8,
-      category: "Food",
-      icon: <AiOutlineShoppingCart className="h-4 w-4 text-gray-600" />,
-      datetime: "7 Dec 23 7:45 PM",
-      amount: -20.15,
-      payment: "Cash",
-    },
-    {
-      id: 9,
-      category: "Utilities",
-      icon: <GoLightBulb className="h-4 w-4 text-gray-600" />,
-      datetime: "8 Dec 23 9:30 AM",
-      amount: -65.4,
-      payment: "Card **4156",
-    },
-    {
-      id: 10,
-      category: "Salary",
-      icon: <FiDollarSign className="h-4 w-4 text-gray-600" />,
-      datetime: "8 Dec 23 11:00 AM",
-      amount: 5000,
-      payment: "Card **5230",
-    },
-    {
-      id: 11,
-      category: "Entertainment",
-      icon: <AiOutlineShoppingCart className="h-4 w-4 text-gray-600" />,
-      datetime: "9 Dec 23 8:00 PM",
-      amount: -120.5,
-      payment: "Card **4156",
-    },
-    {
-      id: 12,
-      category: "Shopping",
-      icon: <AiOutlineShoppingCart className="h-4 w-4 text-gray-600" />,
-      datetime: "10 Dec 23 4:45 PM",
-      amount: -250.75,
-      payment: "Card **5230",
-    },
-  ];
-  
+  // const [showUpdateTransaction, setShowUpdateTransaction] = useState(false);
+  const { transactions } = useTransactions();
+
+
+  // Assign sorted transactions to allTransactions
+  const allTransactions = sortTransactionsByRecent(transactions);
 
   const [currentPage, setCurrentPage] = useState(1);
   const transactionsPerPage = 4;
@@ -152,27 +48,26 @@ const TransactionsList = () => {
 
         {/* Transactions */}
         <div className="space-y-2 mt-2">
-          {currentTransactions.map((transaction) => (
+          {currentTransactions.map((transaction, index) => (
             <div
-              key={transaction.id}
+              key={index}
               className="grid grid-cols-4 items-center py-3 px-2 hover:bg-gray-50 rounded-lg"
             >
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-full bg-gray-100">{transaction.icon}</div>
-                <span>{transaction.category}</span>
+                <span>{transaction.categoryName}</span>
               </div>
-              <div className="text-gray-600">{transaction.datetime}</div>
+              <div className="text-gray-600">{transaction.date ? new Date(transaction.date).toLocaleDateString() : ''}</div>
               <div
                 className={
-                  transaction.amount > 0
+                  Number(transaction.amount) > 0
                     ? "text-green-500"
                     : "text-red-500"
                 }
               >
-                {transaction.amount > 0 ? "+" : ""}${Math.abs(transaction.amount).toFixed(2)}
+                {Number(transaction.amount) > 0 ? "+" : ""}${Math.abs(Number(transaction.amount)).toFixed(2)}
               </div>
               <div className="flex items-center justify-between text-gray-600">
-                <span>{transaction.payment}</span>
+                <span>{transaction.accountName}</span>
                 <div className="relative">
                   <button
                     className="p-1 hover:bg-gray-100 rounded-full"
@@ -212,7 +107,7 @@ const TransactionsList = () => {
           ))}
         </div>
       </div>
-       {showUpdateTransaction && <UpdateTransactionCard transactionDetails={selectedTransaction} onClose={()=>setShowUpdateTransaction(false)} onUpdate={()=>setShowUpdateTransaction(false)}/> }
+       {/* {showUpdateTransaction && <UpdateTransactionCard  onClose={()=>setShowUpdateTransaction(false)} onUpdate={()=>setShowUpdateTransaction(false)}/> } */}
     </div>
   );
 };

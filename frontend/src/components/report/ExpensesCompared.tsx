@@ -1,4 +1,6 @@
 import { Bar } from "react-chartjs-2";
+import { useTransactions } from '../../utils/TransactionsContext';
+import calculateCategoryExpensesCurrentPrevMonth from '../../utils/CurrentPrevMonthExpense';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -18,19 +20,27 @@ ChartJS.register(
   Legend
 );
 
+interface CurrentPrevMonthExpenseResult {
+  currentMonthExpenses: number[];
+  prevMonthExpenses: number[];
+  categories: string[];
+}
 const ExpensesCompared = () => {
+  const { transactions } = useTransactions();
+  const { currentMonthExpenses, prevMonthExpenses, categories } = calculateCategoryExpensesCurrentPrevMonth(transactions);
+
   const data = {
-    labels: ["Clothes", "Car", "Health", "Education", "Utilities", "Food"],
+    labels: categories,
     datasets: [
       {
         label: "March",
-        data: [800, 600, 500, 700, 900, 1000],
+        data: currentMonthExpenses,
         backgroundColor: "#4A90E2",
         barThickness: 20,
       },
       {
         label: "February",
-        data: [700, 500, 400, 600, 800, 900],
+        data: prevMonthExpenses,
         backgroundColor: "#50E3C2",
         barThickness: 20,
       },
@@ -61,7 +71,7 @@ const ExpensesCompared = () => {
     scales: {
       y: {
         ticks: {
-          callback: function (value) {
+          callback: function (value:any) {
             return "$" + value;
           },
           color: "#4a5568",

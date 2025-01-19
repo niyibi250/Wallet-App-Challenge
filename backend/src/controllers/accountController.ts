@@ -36,9 +36,17 @@ export const createAccount = async (req: Request, res: Response): Promise<void> 
 };
 
 export const getAccounts = async (req: Request, res: Response): Promise<void> => {
+    console.log(req.query)
     try {
-        const accounts = await Account.find();
-        res.status(200).json({ success: true, accounts });
+        const { userId } = req.query;
+        const userExists = await User.findById( userId );
+        if (userExists) {
+            const accounts = await Account.find();
+            res.status(200).json({ success: true, accounts });
+        } else {
+            res.status(404).json({ success: false, message: 'User does not exist' });
+        }
+        
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
     }

@@ -1,4 +1,6 @@
 import { Line } from "react-chartjs-2";
+import calculateIncomeAndExpenses from "../../utils/calculateIncomeAndExpensesoverperiod";
+import { useTransactions } from '../../utils/TransactionsContext';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,21 +13,31 @@ import {
 } from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+interface IncomeAndExpensesResult {
+  income: number[];
+  expenses: number[];
+  months: string[];
+}
 
 const StatisticsChart = () => {
+  const { transactions } = useTransactions();
+
+  const incomeAndExpenses: IncomeAndExpensesResult = calculateIncomeAndExpenses(transactions, 6);
+  console.log(incomeAndExpenses);
+
   const data = {
-    labels: ["Dec 1", "Dec 2", "Dec 3", "Dec 4", "Dec 5", "Dec 6", "Dec 7"],
+    labels: incomeAndExpenses.months,
     datasets: [
       {
         label: "Income",
-        data: [2000, 3000, 1500, 4000, 3500, 4500, 3000],
+        data: incomeAndExpenses.income,
         borderColor: "#3B82F6", // Blue
         backgroundColor: "#3B82F6",
         tension: 0.4,
       },
       {
         label: "Expenses",
-        data: [1500, 2500, 2000, 3000, 4000, 3500, 2500],
+        data: incomeAndExpenses.expenses,
         borderColor: "#F97316", // Orange
         backgroundColor: "#F97316",
         tension: 0.4,

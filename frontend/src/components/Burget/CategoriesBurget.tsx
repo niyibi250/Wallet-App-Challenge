@@ -1,44 +1,74 @@
-import { FiMoreVertical } from "react-icons/fi";
+import { FiMoreVertical, FiTrash2 } from "react-icons/fi";
+import { useBudgets } from "../../utils/BudgetContext";
+import calculateTotalExpense from '../../utils/calculateTotalExpense';
+import { useTransactions } from '../../utils/TransactionsContext';
 const CategoryBudgets = () => {
+  const { budgets } = useBudgets();
+  const { transactions } = useTransactions();
+ 
+  // Processing Each Budget
+// const results = budgets.map(budget => {
+//   const { categoryName, startDate, endDate } = budget;
+//   return calculateTotalExpense(transactions, startDate, endDate, categoryName);
+// });
+
+
   const categories = [
     {
       name: "Food",
       total: 1200,
       spent: 820,
       color: "#FF6B6B",
+      startDate: new Date(2025, 0, 1), // Start date
+      endDate: new Date(2025, 11, 31), // End date
     },
     {
       name: "Utilities",
       total: 800,
       spent: 690,
       color: "#FFD93D",
+      startDate: new Date(2025, 0, 1), // Start date
+      endDate: new Date(2025, 11, 31), // End date
     },
     {
       name: "Health",
       total: 400,
       spent: 160,
       color: "#4CAF50",
+      startDate: new Date(2025, 0, 1), // Start date
+      endDate: new Date(2025, 11, 31), // End date
     },
     {
       name: "Car",
       total: 260,
       spent: 120,
       color: "#2196F3",
+      startDate: new Date(2025, 0, 1), // Start date
+      endDate: new Date(2025, 11, 31), // End date
     },
     {
       name: "Else",
       total: 4590,
       spent: 1320,
       color: "#9C27B0",
+      startDate: new Date(2025, 0, 1), // Start date
+      endDate: new Date(2025, 11, 31), // End date
     },
   ];
+
+  const handleDelete = (index: number) => {
+    const updatedCategories = [...categories];
+    updatedCategories.splice(index, 1);
+    // Assuming there's a state update to manage categories
+    // setCategories(updatedCategories);
+  };
 
   return (
     <div className="w-full flex items-center justify-center">
       <div className="w-full max-w-none bg-white rounded-lg shadow-lg border p-4">
         {/* Header */}
         <div className="flex justify-between items-center border-b pb-3 mb-4">
-          <h3 className="font-bold font-accent text-Grey-80 text-lg">Spend Progress</h3>
+          <h3 className="font-bold font-accent text-Grey-80 text-lg">Burget Progress</h3>
           <button className="p-1 hover:border hover:border-primary rounded-full text-Grey-80">
             <FiMoreVertical/>
           </button>
@@ -58,6 +88,12 @@ const CategoryBudgets = () => {
                   <span className="font-medium">
                     $ {category.total.toLocaleString()}
                   </span>
+                  <button
+                    onClick={() => handleDelete(index)}
+                    className="p-1 hover:bg-gray-200 rounded-full"
+                  >
+                    <FiTrash2 className="h-4 w-4 text-red-500" />
+                  </button>
                 </div>
 
                 {/* Progress Bar */}
@@ -81,6 +117,11 @@ const CategoryBudgets = () => {
                     $ {remaining.toLocaleString()}
                     <div className="text-xs">Left</div>
                   </div>
+                </div>
+
+                {/* Date Details */}
+                <div className="text-gray-500 text-sm">
+                  {category.startDate.toLocaleDateString()} - {category.endDate.toLocaleDateString()}
                 </div>
               </div>
             );

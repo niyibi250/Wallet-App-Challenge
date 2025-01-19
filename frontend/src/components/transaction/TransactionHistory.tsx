@@ -4,88 +4,67 @@ import { IoMdAdd } from "react-icons/io";
 import { FiMoreVertical } from "react-icons/fi";
 import CustomButton from '../CustomButton';
 import AddTransactiontable from '../transaction/AddTransaction';
-import UpdateTransactionCard from './updatetransaction';
+import { useTransactions } from '../../utils/TransactionsContext';
 
 const TransactionHistory = () => {
+  const { transactions } = useTransactions();
   const [currentPage, setCurrentPage] = useState(1);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState('');
+  const [selectedPeriod, setSelectedPeriod] = useState('This Month'); // Default period
+  const [selectedCategory, setSelectedCategory] = useState('All'); // Default category
   const [showAddTransaction, setShowAddTransaction] = useState(false);
-  const [showUpdateTransaction, setShowUpdateTransaction] = useState(false);
-  const [transactionToUpdate, setTransactionToUpdate] = useState(null);
   const transactionsPerPage = 8;
 
-  const transactions = [
-    {
-      merchant: "Fornelino",
-      account: "Monobank",
-      category: "Groceries",
-      icon: "🛒",
-      date: "Apr 15, 2024",
-      amount: -570,
-    },
-    {
-      merchant: "From Sarah G.",
-      account: "Monobank",
-      category: "Uncategorized",
-      icon: "❓",
-      date: "Apr 15, 2024",
-      amount: 5560,
-    },
-    {
-      merchant: "MakeUp",
-      account: "Wise",
-      category: "Beauty",
-      icon: "💄",
-      date: "Apr 15, 2024",
-      amount: -533,
-    },
-    {
-      merchant: "KyivPass",
-      account: "Privatbank",
-      category: "Transport",
-      icon: "🚌",
-      date: "Apr 14, 2024",
-      amount: -59,
-    },
-    {
-      merchant: "From Peter S.",
-      account: "Revolut",
-      category: "Uncategorized",
-      icon: "❓",
-      date: "Apr 14, 2024",
-      amount: 5700,
-    },
-    {
-      merchant: "Zoomaster",
-      account: "Revolut",
-      category: "Pets",
-      icon: "🐾",
-      date: "Apr 13, 2024",
-      amount: -556,
-    },
-    {
-      merchant: "Photovision",
-      account: "Pumb",
-      category: "Hobby",
-      icon: "📸",
-      date: "Apr 11, 2024",
-      amount: -540,
-    },
-    {
-      merchant: "Netflix",
-      account: "Wise",
-      category: "Subscription",
-      icon: "🎬",
-      date: "Apr 11, 2024",
-      amount: -510,
-    },
-  ];
+  const filterTransactions = () => {
+    let filteredTransactions = transactions;
 
-  const totalPages = Math.ceil(transactions.length / transactionsPerPage);
+    if (selectedCategory !== 'All') {
+      filteredTransactions = filteredTransactions.filter(
+        transaction => transaction.categoryName === selectedCategory
+      );
+    }
+
+    if (selectedPeriod && selectedPeriod !== 'This Month') {
+      const now = new Date();
+      switch (selectedPeriod) {
+        case 'Last Month':
+          const lastMonth = new Date(now.setMonth(now.getMonth() - 1));
+          filteredTransactions = filteredTransactions.filter(
+            transaction => 
+              transaction.date && 
+              new Date(transaction.date).getMonth() === lastMonth.getMonth() && 
+              new Date(transaction.date).getFullYear() === lastMonth.getFullYear()
+          );
+          break;
+        case 'Last Quarter':
+          const lastQuarter = new Date(now.setMonth(now.getMonth() - 3));
+          filteredTransactions = filteredTransactions.filter(
+            transaction => 
+              transaction.date && 
+              new Date(transaction.date) >= lastQuarter
+          );
+          break;
+        case 'Last Year':
+          const lastYear = new Date(now.setFullYear(now.getFullYear() - 1));
+          filteredTransactions = filteredTransactions.filter(
+            transaction => 
+              transaction.date && 
+              new Date(transaction.date).getFullYear() === lastYear.getFullYear()
+          );
+          break;
+        default:
+          break;
+      }
+    }
+
+    return filteredTransactions;
+  };
+
+  const filteredTransactions = filterTransactions(); // Apply filtering
+  const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
   const indexOfLastTransaction = currentPage * transactionsPerPage;
   const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
-  const currentTransactions = transactions.slice(indexOfFirstTransaction, indexOfLastTransaction);
+  const currentTransactions = filteredTransactions.slice(indexOfFirstTransaction, indexOfLastTransaction);
 
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -98,6 +77,10 @@ const TransactionHistory = () => {
   const handlePeriodChange = (period: string) => {
     setSelectedPeriod(period);
     setIsMenuOpen(false);
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
   };
 
   return (
@@ -117,9 +100,24 @@ const TransactionHistory = () => {
           </div>
           <div className="flex flex-row justify-between items-center gap-4 mt-6">
             <div className="flex gap-4 text-sm text-Grey-80 font-accent font-bold">
-              <button className="hover:text-gray-200">All Transactions</button>
-              <button className="hover:text-gray-200">Expenses</button>
-              <button className="hover:text-gray-200">Income</button>
+              <button
+                className={`hover:text-gray-200 ${selectedCategory === 'All' ? 'text-primary' : ''}`}
+                onClick={() => handleCategoryChange('All')}
+              >
+                All Transactions
+              </button>
+              <button
+                className={`hover:text-gray-200 ${selectedCategory === 'Expenses' ? 'text-primary' : ''}`}
+                onClick={() => handleCategoryChange('Expenses')}
+              >
+                Expenses
+              </button>
+              <button
+                className={`hover:text-gray-200 ${selectedCategory === 'Income' ? 'text-primary' : ''}`}
+                onClick={() => handleCategoryChange('Income')}
+              >
+                Income
+              </button>
             </div>
             <div className="flex items-center gap-2">
               <div className="relative inline-block text-left bg-Grey-5 text-Grey-100 rounded-md px-2 hover:border hover:border-primary">
@@ -130,7 +128,7 @@ const TransactionHistory = () => {
                   aria-expanded={isMenuOpen}
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                 >
-                  {selectedPeriod ? selectedPeriod : 'This Month'}
+                  {selectedPeriod}
                   <IoChevronDown className='ml-10' />
                 </button>
                 {isMenuOpen && (
@@ -163,17 +161,16 @@ const TransactionHistory = () => {
             <tbody>
               {currentTransactions.map((transaction, index) => (
                 <tr key={index} className="font-semibold border-b border-gray-800">
-                  <td className="py-4">{transaction.merchant}</td>
-                  <td>{transaction.account}</td>
+                  <td className="py-4">{transaction.description}</td>
+                  <td>{transaction.categoryName}</td>
                   <td>
                     <div className="flex items-center gap-2">
-                      <span>{transaction.icon}</span>
-                      {transaction.category}
+                      {transaction.categoryName}
                     </div>
                   </td>
-                  <td>{transaction.date}</td>
-                  <td className={transaction.amount > 0 ? "text-green-400" : "text-red-400"}>
-                    {transaction.amount > 0 ? "+" : ""}
+                  <td>{transaction.date ? new Date(transaction.date).toLocaleDateString() : ''}</td>
+                  <td className={Number(transaction.amount) > 0 ? "text-green-400" : "text-red-400"}>
+                    {Number(transaction.amount) > 0 ? "+" : ""}
                     {transaction.amount}
                   </td>
                   <td className='text-center'>
@@ -198,8 +195,8 @@ const TransactionHistory = () => {
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
                           Delete
                         </button>
+                      </div>
                     </div>
-                </div>
                   </td>
                 </tr>
               ))}
@@ -209,7 +206,7 @@ const TransactionHistory = () => {
 
         <div className="flex justify-between items-center mt-4 text-sm text-Grey-100">
           <div>
-            {indexOfFirstTransaction + 1}-{Math.min(indexOfLastTransaction, transactions.length)} of {transactions.length}
+            {indexOfFirstTransaction + 1}-{Math.min(indexOfLastTransaction, filteredTransactions.length)} of {filteredTransactions.length}
           </div>
           <div className="flex items-center gap-2">
             <button className="p-1 hover:bg-gray-800 rounded" onClick={handlePrevPage} disabled={currentPage === 1}>
@@ -231,10 +228,8 @@ const TransactionHistory = () => {
         </div>
       </div>
       {showAddTransaction && <AddTransactiontable onClose={()=>setShowAddTransaction(false)} onSave={()=>setShowAddTransaction(false)}/> }
-      {showUpdateTransaction && (<UpdateTransactionCard transactionDetails={transactionToUpdate} onClose={() => setShowUpdateTransaction(false)} onUpdate={handleUpdateTransaction}/>)}
     </div>
   );
 };
 
 export default TransactionHistory;
-

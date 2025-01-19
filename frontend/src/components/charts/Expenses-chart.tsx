@@ -1,4 +1,6 @@
 import { Doughnut } from "react-chartjs-2";
+import { useTransactions } from '../../utils/TransactionsContext';
+import calculateCategoryExpenses from "../../utils/calculateCategoryExpenses";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -8,12 +10,20 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+interface CategoryExpenseResult {
+  expenses: number[];
+  categories: string[];
+  totalExpense: number;
+}
 const ExpensesChart = () => {
+  const { transactions } = useTransactions();
+  const categoryExpenses: CategoryExpenseResult = calculateCategoryExpenses(transactions, 6);
+  
   const data = {
-    labels: ["Food", "Health", "Utilities", "Car", "Education", "Clothes"],
+    labels: categoryExpenses.categories,
     datasets: [
       {
-        data: [31, 27, 22, 11, 6, 3], // Percentage distribution
+        data: categoryExpenses.expenses, // Percentage distribution
         backgroundColor: [
           "#FACC15", // Food - Yellow
           "#A855F7", // Health - Purple

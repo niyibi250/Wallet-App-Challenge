@@ -1,3 +1,6 @@
+import { Bar } from "react-chartjs-2";
+import calculateIncomeAndExpenses from "../../utils/calculateIncomeAndExpensesoverperiod"; // Adjust the import as necessary
+import { useTransactions } from '../../utils/TransactionsContext';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -7,18 +10,27 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { Bar } from "react-chartjs-2";
-
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+interface IncomeAndExpensesResult {
+  income: number[];
+  expenses: number[];
+  months: string[];
+}
+
 const IncomeExpensesChart = () => {
+  const { transactions } = useTransactions();
+
+  const incomeAndExpenses: IncomeAndExpensesResult = calculateIncomeAndExpenses(transactions, 6);
+  console.log(incomeAndExpenses);
+  
   const data = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    labels: incomeAndExpenses.months,
     datasets: [
       {
         label: "Income",
-        data: [9500, 7500, 8800, 7200, 9000, 9600],
+        data: incomeAndExpenses.income,
         backgroundColor: "#3B82F6", // Blue
         borderRadius: 4,
         barPercentage: 0.8,
@@ -26,7 +38,7 @@ const IncomeExpensesChart = () => {
       },
       {
         label: "Expenses",
-        data: [9200, 8000, 8400, 7800, 8300, 9100],
+        data: incomeAndExpenses.expenses,
         backgroundColor: "#FB923C", // Orange
         borderRadius: 4,
         barPercentage: 0.8,
@@ -111,4 +123,3 @@ const IncomeExpensesChart = () => {
 };
 
 export default IncomeExpensesChart;
-

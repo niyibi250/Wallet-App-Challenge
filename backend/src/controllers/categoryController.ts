@@ -40,7 +40,7 @@ export const getCategories = async (req: Request, res: Response): Promise<void> 
 
         if (userExists) {
             const categories = await Category.find({ userId });
-        res.status(200).json({ success: true, categories });
+            res.status(200).json({ success: true, categories });
         } else {
             res.status(404).json({ success: false, message: 'User does not exist' });
         }

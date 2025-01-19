@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import { IoCloseCircleOutline } from 'react-icons/io5';
 import { Formik, Field, ErrorMessage, Form } from 'formik';
 import * as Yup from 'yup';
@@ -7,6 +6,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useCategories } from '../../utils/CategoriesContext';
+import { useAccount } from '../../utils/AccountContext';
 
 interface AddTransactionCardProps {
   onClose: () => void;
@@ -30,13 +30,11 @@ interface TransactionValues {
 
 const AddTransactiontable = ({ onClose, onSave }: AddTransactionCardProps) => {
   const { categories } = useCategories();
+  const { account } = useAccount();
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   fetchCategories();
-  // }, [fetchCategories]);
-
-  console.log(categories);
+  // console.log('categories in add transaction:',categories);
+  console.log(account);
 
   const validationSchema = Yup.object().shape({
     type: Yup.string().required('Transaction type is required'),
@@ -155,8 +153,16 @@ const AddTransactiontable = ({ onClose, onSave }: AddTransactionCardProps) => {
                       name="accountName"
                       className="w-full font-semibold text-lg border-2 rounded-lg p-2 mt-1 focus:border-primary focus:outline-none"
                     >
-                      <option value="Card **** 4156">Card **** 4156</option>
-                      <option value="Card **** 1234">Card **** 1234</option>
+                       {/* Render account options */}
+                       {account && account.length > 0 ? (
+                        account.map((acc) => (
+                          <option key={acc._id} value={acc.accountName}>
+                            {acc.accountName}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="">No accounts available</option>
+                      )}
                     </Field>
                     <ErrorMessage
                       name="accountName"

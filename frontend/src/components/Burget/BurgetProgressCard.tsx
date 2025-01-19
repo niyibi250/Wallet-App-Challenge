@@ -14,7 +14,7 @@ const BudgetProgressCard = () => {
       <div className="w-full h-full max-w-none bg-white rounded-lg shadow-lg border p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium text-Grey-80">Monthly Budget</h2>
+          <h2 className="text-lg font-medium text-Grey-80">Total Budget</h2>
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold text-Grey-100">
               $ {budgetData.total.toLocaleString()}

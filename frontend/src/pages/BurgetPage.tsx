@@ -4,9 +4,12 @@ import { IoMdAdd } from "react-icons/io";
 import BudgetProgressCard from "../components/Burget/BurgetProgressCard";
 import CategoryBudgets from "../components/Burget/CategoriesBurget";
 import BudgetStatistics from "../components/Burget/BudgetStatistics";
+import AddBudget from '../components/Burget/AddBudgetByCategory';
+import { useState } from "react";
 
 
 function BurgetPage() {
+    const [showAdBurget, setShowAddBurget] = useState(false);
     const handleSelect = (value: string) => {
         console.log("Selected value:", value);
       };
@@ -25,20 +28,19 @@ function BurgetPage() {
                 textstyle='text-lg font-medium'
                 iconstyle='text-lg font-medium pr-2'
                 icon={<IoMdAdd/>}
+                handlepress={() => setShowAddBurget(true)}
                 />
             </div>
         </div>
         <div className="grid grid-cols-4 grid-rows-4 gap-4 mt-5">
-                <div className="col-start-1 col-end-3 row-start-1 row-span-1">
-                    <BudgetProgressCard/>
-                </div>
                 <div className="col-start-3 col-end-5 row-start-1 row-span-2">
                     <BudgetStatistics/>
                 </div>
-                <div className="col-start-1 col-span-2 row-start-2 row-span-3">
+                <div className="col-start-1 col-span-2 row-start-1 row-span-3">
                     <CategoryBudgets/>
                 </div>
         </div>
+        {showAdBurget && <AddBudget onClose={() => setShowAddBurget(false)} onSave={() => setShowAddBurget(false)} />}
     </div>
   )
 }

@@ -5,10 +5,20 @@ import CustomButton from "../components/CustomButton";
 import { IoMdAdd } from "react-icons/io";
 import AddAccountTable from "../components/accounts/AddAcount";
 import AddExpenseCategory from "../components/accounts/AddExpenseCategory";
+import { useTransactions } from '../utils/TransactionsContext';
+import sortAndSummarizeTransactions from "../utils/sortAndSummarizeTransactions";
+
 
 function Accountpage() {
     const [showAddAccount, setShowAddAccount] = useState(false);
     const [showAddCategory, setShowAddCategory] = useState(false);
+    const { transactions } = useTransactions();
+    const { sortedSummary} = sortAndSummarizeTransactions(transactions);
+    const Income = sortedSummary.find((transaction) => transaction.type === "Income");
+    const Expenses = sortedSummary.find((transaction) => transaction.type === "Expense");
+    const Savings = sortedSummary.find((transaction) => transaction.type === "Saving");
+
+
   return (
     <div className=" p-8">
         <div className=" flex flex-row items-center justify-between mb-5">
@@ -35,38 +45,32 @@ function Accountpage() {
         <div className="grid grid-cols-3 gap-4">
                 <div className="col-start-1 col-span-1">
                     <AccountCard
-                        bankName="Bank of America"
-                        accountType="Savings"
-                        balance={5000}
-                        lastTransaction={{
-                        amount: 200,
-                        date: "2023-10-15",
-                        category: "Grocery",
-                        }}
+                        bankName="Income"
+                        accountType=""
+                        balance={Income?.totalAmount || 0}
+                        lastTransactionamount= {Income?.lastTransaction?.amount}
+                        lastTransactioncategory= {Income?.lastTransaction?.categoryName}
+                        lastTransactiondate= { Income?.lastTransaction?.date}
                     />
                 </div>
                 <div className="col-start-2 col-span-1">
                     <AccountCard
-                        bankName="Bank of America"
-                        accountType="Savings"
-                        balance={5000}
-                        lastTransaction={{
-                        amount: 200,
-                        date: "2023-10-15",
-                        category: "Grocery",
-                        }}
+                        bankName="Expense"
+                        accountType=""
+                        balance={Expenses?.totalAmount || 0}
+                        lastTransactionamount= {Expenses?.lastTransaction?.amount}
+                        lastTransactioncategory= {Expenses?.lastTransaction?.categoryName}
+                        lastTransactiondate= { Expenses?.lastTransaction?.date}
                     />
                 </div>
                 <div className="col-start-3 col-span-1">
                     <AccountCard
-                        bankName="Bank of America"
-                        accountType="Savings"
-                        balance={5000}
-                        lastTransaction={{
-                        amount: 200,
-                        date: "2023-10-15",
-                        category: "Grocery",
-                        }}
+                        bankName="Saving"
+                        accountType=""
+                        balance={Savings?.totalAmount || 0}
+                        lastTransactionamount= {Savings?.lastTransaction?.amount}
+                        lastTransactioncategory= {Savings?.lastTransaction?.categoryName}
+                        lastTransactiondate= { Savings?.lastTransaction?.date}
                     />
                 </div>
                 <div className="col-start-1 col-span-3">
