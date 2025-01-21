@@ -2,7 +2,7 @@ interface TransactionValues {
     userId: string;
     accountName: string;
     type: string;
-    amount: string; // as string because of API response
+    amount: string;
     categoryName: string;
     description: string;
     date: Date | null;
@@ -22,7 +22,6 @@ interface TransactionValues {
       new Date(currentYear, currentMonth - index)
     );
   
-    // Filter transactions based on the date within the desired period
     const filteredTransactions = transactions.filter(transaction => {
       if (!transaction.date) return false;
       return desiredMonths.some(month => 
@@ -32,7 +31,6 @@ interface TransactionValues {
       );
     });
   
-    // Group transactions by category and sum their amounts
     const groupedByCategory = filteredTransactions.reduce((acc, transaction) => {
       if (!acc[transaction.categoryName]) {
         acc[transaction.categoryName] = 0;

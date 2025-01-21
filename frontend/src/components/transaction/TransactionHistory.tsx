@@ -4,63 +4,61 @@ import { IoMdAdd } from "react-icons/io";
 import { FiMoreVertical } from "react-icons/fi";
 import CustomButton from '../CustomButton';
 import AddTransactiontable from '../transaction/AddTransaction';
-import { useTransactions } from '../../utils/TransactionsContext';
+import { useAppSelector } from '../../state/hooks';
+import { RootState } from '../../state/store';
 
 const TransactionHistory = () => {
-  const { transactions } = useTransactions();
+  const { transactions } = useAppSelector((state: RootState) => state.transaction);
   const [currentPage, setCurrentPage] = useState(1);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState('This Month'); // Default period
-  const [selectedCategory, setSelectedCategory] = useState('All'); // Default category
+  const [selectedPeriod, setSelectedPeriod] = useState('This Month');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [showAddTransaction, setShowAddTransaction] = useState(false);
   const transactionsPerPage = 8;
 
   const filterTransactions = () => {
-    let filteredTransactions = transactions;
+    const now = new Date();
+    let startDate, endDate;
 
-    if (selectedCategory !== 'All') {
-      filteredTransactions = filteredTransactions.filter(
-        transaction => transaction.categoryName === selectedCategory
-      );
+    switch (selectedPeriod) {
+      case 'This Month':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        break;
+      case 'Last Month':
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+        break;
+      case 'Last Quarter':
+        startDate = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+        endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+        break;
+      case 'Last Year':
+        startDate = new Date(now.getFullYear() - 1, 0, 1);
+        endDate = new Date(now.getFullYear(), 0, 0);
+        break;
+      default:
+        startDate = new Date(0);
+        endDate = new Date();
     }
 
-    if (selectedPeriod && selectedPeriod !== 'This Month') {
-      const now = new Date();
-      switch (selectedPeriod) {
-        case 'Last Month':
-          const lastMonth = new Date(now.setMonth(now.getMonth() - 1));
-          filteredTransactions = filteredTransactions.filter(
-            transaction => 
-              transaction.date && 
-              new Date(transaction.date).getMonth() === lastMonth.getMonth() && 
-              new Date(transaction.date).getFullYear() === lastMonth.getFullYear()
-          );
-          break;
-        case 'Last Quarter':
-          const lastQuarter = new Date(now.setMonth(now.getMonth() - 3));
-          filteredTransactions = filteredTransactions.filter(
-            transaction => 
-              transaction.date && 
-              new Date(transaction.date) >= lastQuarter
-          );
-          break;
-        case 'Last Year':
-          const lastYear = new Date(now.setFullYear(now.getFullYear() - 1));
-          filteredTransactions = filteredTransactions.filter(
-            transaction => 
-              transaction.date && 
-              new Date(transaction.date).getFullYear() === lastYear.getFullYear()
-          );
-          break;
-        default:
-          break;
-      }
-    }
+    const categoryFiltered = transactions.filter((transaction) => {
+      if (selectedCategory === 'All') return true;
+      if (selectedCategory === 'Expenses') return transaction.type === 'expense';
+      if (selectedCategory === 'Incomes') return transaction.type === 'income';
+      if (selectedCategory === 'Saving') return transaction.type === 'saving';
+      return true;
+    });
 
-    return filteredTransactions;
+    const periodFiltered = categoryFiltered.filter((transaction) => {
+      const transactionDate = new Date(transaction.date);
+      return transactionDate >= startDate && transactionDate <= endDate;
+    });
+
+    return periodFiltered;
   };
 
-  const filteredTransactions = filterTransactions(); // Apply filtering
+  const filteredTransactions = filterTransactions();
   const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
   const indexOfLastTransaction = currentPage * transactionsPerPage;
   const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
@@ -116,7 +114,13 @@ const TransactionHistory = () => {
                 className={`hover:text-gray-200 ${selectedCategory === 'Income' ? 'text-primary' : ''}`}
                 onClick={() => handleCategoryChange('Income')}
               >
-                Income
+                Incomes
+              </button>
+              <button
+                className={`hover:text-gray-200 ${selectedCategory === 'Savings' ? 'text-primary' : ''}`}
+                onClick={() => handleCategoryChange('Saving')}
+              >
+                Savings
               </button>
             </div>
             <div className="flex items-center gap-2">
@@ -150,7 +154,7 @@ const TransactionHistory = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="text-lg text-Grey-100 font-semibold font-accent border-b border-gray-700">
-                <th className="text-left pb-3">Merchant</th>
+                <th className="text-left pb-3">Transaction Description</th>
                 <th className="text-left pb-3">Account</th>
                 <th className="text-left pb-3">Category</th>
                 <th className="text-left pb-3">Date</th>
@@ -161,16 +165,16 @@ const TransactionHistory = () => {
             <tbody>
               {currentTransactions.map((transaction, index) => (
                 <tr key={index} className="font-semibold border-b border-gray-800">
-                  <td className="py-4">{transaction.description}</td>
-                  <td>{transaction.categoryName}</td>
+                  <td className="py-4">{transaction.notes}</td>
+                  <td>{transaction.account.accountName}</td>
                   <td>
                     <div className="flex items-center gap-2">
-                      {transaction.categoryName}
+                      {transaction.category.name}
                     </div>
                   </td>
                   <td>{transaction.date ? new Date(transaction.date).toLocaleDateString() : ''}</td>
-                  <td className={Number(transaction.amount) > 0 ? "text-green-400" : "text-red-400"}>
-                    {Number(transaction.amount) > 0 ? "+" : ""}
+                  <td className={transaction.type !== "expense" ? "text-primary" : "text-Red"}>
+                    {transaction.type !== "expense" ? "+" : "-"}
                     {transaction.amount}
                   </td>
                   <td className='text-center'>
@@ -186,12 +190,12 @@ const TransactionHistory = () => {
                       </button>
                       <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10 hidden">
                         <button
-                          onClick={()=>{}} 
+                          onClick={() => { }}
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
                           Update
                         </button>
-                        <button 
-                          onClick={()=>{}}
+                        <button
+                          onClick={() => { }}
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
                           Delete
                         </button>
@@ -227,7 +231,7 @@ const TransactionHistory = () => {
           </div>
         </div>
       </div>
-      {showAddTransaction && <AddTransactiontable onClose={()=>setShowAddTransaction(false)} onSave={()=>setShowAddTransaction(false)}/> }
+      {showAddTransaction && <AddTransactiontable onClose={() => setShowAddTransaction(false)} />}
     </div>
   );
 };

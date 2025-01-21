@@ -3,72 +3,60 @@ import { Formik, Field, ErrorMessage, Form } from 'formik';
 import * as Yup from 'yup';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { useCategories } from '../../utils/CategoriesContext';
+import { useAppSelector, useAppDispatch } from '../../state/hooks';
+import { RootState } from '../../state/store';
+import { createBudget } from '../../state/burget/BurgetSlice';
 
 interface AddBudgetProps {
   onClose: () => void;
-  onSave: (values: BudgetValues) => void;
 }
 
-interface user {
-  id: string;
-  name: string;
-  email: string;
-}
 interface BudgetValues {
-  categoryName: string;
+  categoryId: string;
   amount: string;
-  period: number;
   startDate: Date | null;
   endDate: Date | null;
 }
 
-const AddBudget = ({ onClose, onSave }: AddBudgetProps) => {
-  const { categories } = useCategories();
-  const navigate = useNavigate();
+const validationSchema = Yup.object().shape({
+  categoryId: Yup.string().required('Category is required'),
+  amount: Yup.number()
+    .typeError('Amount must be a number')
+    .positive('Amount must be positive')
+    .required('Amount is required'),
+  startDate: Yup.date()
+    .nullable()
+    .required('Start date is required'),
+  endDate: Yup.date()
+    .nullable()
+    .required('End date is required')
+    .min(Yup.ref('startDate'), 'End date cannot be before start date'),
+});
 
-  const validationSchema = Yup.object().shape({
-    categoryName: Yup.string().required('Category is required'),
-    amount: Yup.number()
-      .typeError('Amount must be a number')
-      .positive('Amount must be positive')
-      .required('Amount is required'),
-    period: Yup.number()
-      .typeError('Period must be a number')
-      .positive('Period must be positive')
-      .required('Period is required'),
-    startDate: Yup.date()
-      .nullable()
-      .required('Start date is required'),
-    endDate: Yup.date()
-      .nullable()
-      .required('End date is required')
-      .min(Yup.ref('startDate'), 'End date cannot be before start date'),
-  });
+const AddBudget = ({ onClose }: AddBudgetProps) => {
+  const { categories } = useAppSelector((state: RootState) => state.category);
+  const dispatch = useAppDispatch();
 
-  const initialValues = {
-    categoryName: '',
+  const initialValues: BudgetValues = {
+    categoryId: '',
     amount: '',
-    period: 1,
     startDate: null,
     endDate: null,
   };
-  // const url = 'http://localhost:3000/api'
-  const url = 'https://wallet-app-challenge-backend.onrender.com/api'
+
   const handleSubmit = async (values: BudgetValues) => {
     try {
-      const user: user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '') : { id: '', name: '', email: '' };
-      const formData = { ...values, userId: user.id};
-      const response = await axios.post(`${url}/budgets/`, formData);
-      console.log('Response:', response.data);
-      navigate('/dashboard');
+      const budgetData = {
+        category: [values.categoryId],
+        amount: parseFloat(values.amount),
+        startDate: values.startDate ? values.startDate.toISOString() : '',
+        endDate: values.endDate ? values.endDate.toISOString() : '',
+      };
+      await dispatch(createBudget({ budgetData }));
+      onClose();
     } catch (error) {
       console.error('Budget creation failed:', error);
     }
-    onSave(values);
-    onClose();
   };
 
   return (
@@ -93,13 +81,13 @@ const AddBudget = ({ onClose, onSave }: AddBudgetProps) => {
                   <label className="block font-semibold">Category</label>
                   <Field
                     as="select"
-                    name="categoryName"
+                    name="categoryId"
                     className="w-full font-semibold text-lg border-2 rounded-lg p-2 mt-1 focus:border-primary focus:outline-none"
                   >
                     {categories && categories.length > 0 ? (
                       categories.map((category) => (
-                        <option key={category._id} value={category.categoryName}>
-                          {category.categoryName}
+                        <option key={category._id} value={category._id}>
+                          {category.name}
                         </option>
                       ))
                     ) : (
@@ -107,7 +95,7 @@ const AddBudget = ({ onClose, onSave }: AddBudgetProps) => {
                     )}
                   </Field>
                   <ErrorMessage
-                    name="categoryName"
+                    name="categoryId"
                     component="div"
                     className="text-red-500 text-sm mt-1"
                   />
@@ -122,20 +110,6 @@ const AddBudget = ({ onClose, onSave }: AddBudgetProps) => {
                   />
                   <ErrorMessage
                     name="amount"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold">Period (in months)</label>
-                  <Field
-                    type="number"
-                    name="period"
-                    className="w-full font-semibold text-lg border-2 rounded-lg p-2 mt-1 focus:border-primary focus:outline-none"
-                    min={1}
-                  />
-                  <ErrorMessage
-                    name="period"
                     component="div"
                     className="text-red-500 text-sm mt-1"
                   />

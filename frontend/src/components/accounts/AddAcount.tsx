@@ -1,57 +1,41 @@
 import { IoCloseCircleOutline } from 'react-icons/io5';
 import { Formik, Field, ErrorMessage, Form } from 'formik';
 import * as Yup from 'yup';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useAppDispatch } from '../../state/hooks';
+import { createAccount } from '../../state/accounts/accountSlice';
 
 interface AddAccountCardProps {
   onClose: () => void;
-  onSave: (accountData: {
-    userid: string;
-    accountName: string;
-    accountNumber: string;
-    accountType: string;
-    accountBalance: string;
-  }) => void;
 }
 
-const AddAccountTable = ({ onClose, onSave }: AddAccountCardProps) => {
-  const navigate = useNavigate();
-  const validationSchema = Yup.object().shape({
-    accountName: Yup.string().required('Account Name is required'),
-    accountNumber: Yup.string().required('Account Number is required'),
-    accountType: Yup.string().required('Account Type is required'),
-    accountBalance: Yup.number()
-      .typeError('Account Balance must be a number')
-      .required('Account Balance is required'),
-  });
+const validationSchema = Yup.object().shape({
+  accountName: Yup.string().required('Account Name is required'),
+  accountNumber: Yup.string().required('Account Number is required'),
+  accountType: Yup.string().required('Account Type is required'),
+  accountBalance: Yup.number()
+    .typeError('Account Balance must be a number')
+    .required('Account Balance is required'),
+});
 
-  const initialValues = {
-    accountName: '',
-    accountNumber: '',
-    accountType: 'Bank',
-    accountBalance: '',
-  };
+const initialValues = {
+  accountName: '',
+  accountNumber: '',
+  accountType: 'debit',
+  accountBalance: '',
+};
 
-  interface user {
-    id: string;
-    name: string;
-    email: string;
-  }
-  // const url = 'http://localhost:3000/api'
-  const url = 'https://wallet-app-challenge-backend.onrender.com/api'
+const AddAccountTable = ({ onClose }: AddAccountCardProps) => {
+  const dispatch = useAppDispatch();
+
   const handleSubmit = async (values: typeof initialValues) => {
-    try {
-      const user: user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '') : { id: '', name: '', email: '' };
-      const formData = { ...values, userid: user.id};
-  
-      const response = await axios.post( `${url}/accounts/create`, formData);
-      console.log('Response:', response.data);
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Account creation failed:', error);
-    }
-    onSave({ ...values, userid: localStorage.getItem('userid') || '' });
+    const { accountName, accountNumber, accountType, accountBalance } = values;
+    const accountData = {
+      accountName: accountName,
+      accountNumber: accountNumber,
+      accountType: accountType,
+      balance: Number(accountBalance),
+    };
+    dispatch(createAccount({ accountData }));
     onClose();
   };
   
@@ -117,9 +101,9 @@ const AddAccountTable = ({ onClose, onSave }: AddAccountCardProps) => {
                   name="accountType"
                   className="w-full font-semibold text-lg border-2 rounded-lg p-2 mt-1 focus:border-primary focus:outline-none"
                 >
-                  <option value="Bank">Bank</option>
-                  <option value="Cash">Cash</option>
-                  <option value="MobileMoney">Mobile Money</option>
+                  <option value="debit">Debit</option>
+                  <option value="credit">Credit</option>
+                  <option value="saving">Saving</option>
                 </Field>
                 <ErrorMessage
                   name="accountType"

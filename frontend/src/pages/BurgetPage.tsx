@@ -39,7 +39,7 @@ function BurgetPage() {
                     <CategoryBudgets/>
                 </div>
         </div>
-        {showAdBurget && <AddBudget onClose={() => setShowAddBurget(false)} onSave={() => setShowAddBurget(false)} />}
+        {showAdBurget && <AddBudget onClose={() => setShowAddBurget(false)}/>}
     </div>
   )
 }

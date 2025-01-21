@@ -1,6 +1,7 @@
 import { Line } from "react-chartjs-2";
-import calculateIncomeAndExpenses from "../../utils/calculateIncomeAndExpensesoverperiod";
-import { useTransactions } from '../../utils/TransactionsContext';
+import {prepareIncomeExpenseDataForGraph} from '../../utils/calculateIncomeAndExpensesoverperiod'
+import { useAppSelector } from '../../state/hooks';
+import { RootState } from '../../state/store';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,33 +14,33 @@ import {
 } from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-interface IncomeAndExpensesResult {
-  income: number[];
-  expenses: number[];
-  months: string[];
-}
 
 const StatisticsChart = () => {
-  const { transactions } = useTransactions();
-
-  const incomeAndExpenses: IncomeAndExpensesResult = calculateIncomeAndExpenses(transactions, 6);
-  console.log(incomeAndExpenses);
-
+  const { transactions } = useAppSelector((state: RootState) => state.transaction);
+  const incomeAndExpenses = prepareIncomeExpenseDataForGraph(transactions, 6);
+  
   const data = {
-    labels: incomeAndExpenses.months,
+    labels: incomeAndExpenses.map(item => item.month),
     datasets: [
       {
         label: "Income",
-        data: incomeAndExpenses.income,
-        borderColor: "#3B82F6", // Blue
+        data: incomeAndExpenses.map(item => item.income),
+        borderColor: "#3B82F6",
         backgroundColor: "#3B82F6",
         tension: 0.4,
       },
       {
         label: "Expenses",
-        data: incomeAndExpenses.expenses,
-        borderColor: "#F97316", // Orange
+        data: incomeAndExpenses.map(item => item.expense),
+        borderColor: "#F97316",
         backgroundColor: "#F97316",
+        tension: 0.4,
+      },
+      {
+        label: "Savings",
+        data: incomeAndExpenses.map(item => item.saving),
+        borderColor: "#22C55E",
+        backgroundColor: "#22C55E",
         tension: 0.4,
       },
     ],
@@ -54,7 +55,7 @@ const StatisticsChart = () => {
       title: {
         display: true,
         text: "Income vs Expenses",
-        color: "#55565B",
+        color: "#55565b",
         font: {
           size: 16,
         },
@@ -78,3 +79,4 @@ const StatisticsChart = () => {
 };
 
 export default StatisticsChart;
+

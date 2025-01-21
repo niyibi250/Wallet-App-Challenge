@@ -11,7 +11,6 @@ import { Bar } from "react-chartjs-2";
 import { FaChevronDown } from "react-icons/fa";
 import { useState } from "react";
 
-// Register necessary components for Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const BudgetStatistics = () => {
@@ -27,7 +26,6 @@ const BudgetStatistics = () => {
     { month: "Jun", budget: 8000, expenses: 8200 },
   ];
 
-  // Chart.js Data
   const chartData = {
     labels: data.map((item) => item.month),
     datasets: [
@@ -48,8 +46,6 @@ const BudgetStatistics = () => {
     ],
   };
 
-  // Chart.js Options
-
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -57,7 +53,7 @@ const BudgetStatistics = () => {
       legend: {
         position: "top" as const,
         labels: {
-          color: "#55565B", // Gray text for labels
+          color: "#55565B",
           font: {
             size: 12, weight: 700
           },
@@ -73,7 +69,7 @@ const BudgetStatistics = () => {
       x: {
         ticks: {
           color: "#55565B",
-          font: { size: 13, weight: 700 }, // Gray text for x-axis
+          font: { size: 13, weight: 700 },
         },
         grid: {
           display: false,
@@ -81,12 +77,12 @@ const BudgetStatistics = () => {
       },
       y: {
         ticks: {
-          color: "#55565B", // Gray text for y-axis
+          color: "#55565B",
           font: { size: 13, weight: 700 },
           callback: (tickValue: string | number) => `$ ${tickValue.toLocaleString()}`,
         },
         grid: {
-          color: "#e5e7eb", // Light gray grid lines
+          color: "#e5e7eb",
         },
       },
     },

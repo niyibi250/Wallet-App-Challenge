@@ -1,85 +1,97 @@
 import { Request, Response, NextFunction } from 'express';
+import { check, validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
 
+
+interface CreateUserRequestBody {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+  }
+
+const registerUserRules = [
+    check('firstName').isLength({ min: 1 }).withMessage('First name is required').escape(),
+    check('lastName').isLength({ min: 1 }).withMessage('Last name is required').escape(),
+    check('email').isEmail().normalizeEmail().withMessage('Email is not valid').escape(),
+    check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long').escape(),
+  ];
+
 // Register a user
-export const registerUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    
+export const registerUser = async (req: Request, res: Response)=> {
     try {
-        const { name, email, password } = req.body;
-        console.log(req.body)
-
-        // Validate input
-        if (!password || typeof password !== 'string') {
-            return next(new Error('Invalid password'));
-        }
-
-        // Check if user already exists
+        const { firstName, lastName, email, password } = req.body as CreateUserRequestBody
+     
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            res.status(200).json({ message: 'User already exists', success: false });
+            res.status(409).send({ message: 'User already exists'});
+            return 
+            
         }
-
-        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create and save the new user
-        const user = new User({ name, email, password: hashedPassword });
+        const user = new User({ firstName, lastName, email, password: hashedPassword });
         await user.save();
-
-        res.status(200).json({ message: 'User registered successfully', user });
-    } catch (error: any) {
-        console.error('Error registering user:', error.message);
-        next(error);
-    }
+        const userpayload= {
+            id:user._id,
+            firstName:user.firstName,
+            lastName:user.lastName,
+            email:user.email
+        }
+        const token = jwt.sign(userpayload, process.env.JWT_SECRET as string, { expiresIn: '1d' });
+        res.status(200).json({ message: 'User registered successfully', token, 
+            user:{
+                id:user._id,
+                firstName, 
+                lastName , 
+                email} });
+        return 
+    } catch (error) {
+        const message =
+          (error as { detail?: string }).detail || 'Internal Server Error';
+          res.status(500).send(message);
+          return 
+      }
 };
 
 // Login a user
-export const loginUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, password } = req.body;
 
-        // Find the user by email
         const user = await User.findOne({ email });
         if (!user) {
-            return next(new Error('Invalid email or password'));
-        }
+           res.status(404).send({ message: 'User Not Found' });
+           return 
+          }
 
-        // Compare the password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return next(new Error('Invalid email or password'));
+            res.status(401).send({ message: 'Password does not match' });
+            return   
         }
 
-        // Generate a JWT token
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, { expiresIn: '1d' });
-
-        res.status(200).json({ token, user: { id: user._id, name: user.name, email: user.email } });
-    } catch (error: any) {
-        console.error('Error logging in user:', error.message);
-        next(error);
-    }
-};
-
-// Get current user's profile
-export const getUserProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const { userid } = req.params;
-        const userId = userid // Ensure this is set by authentication middleware
-        if (!userId) {
-            return next(new Error('Unauthorized'));
+        const userpayload= {
+            id:user._id,
+            firstName:user.firstName,
+            lastName:user.lastName,
+            email:user.email
         }
-
-        // Fetch the user and exclude the password field
-        const user = await User.findById(userId).select('-password');
-        if (!user) {
-            return next(new Error('User not found'));
-        }
-
-        res.status(200).json(user);
-    } catch (error: any) {
-        console.error('Error fetching user profile:', error.message);
-        next(error);
-    }
+        const token = jwt.sign(userpayload, process.env.JWT_SECRET as string, { expiresIn: '1d' });
+        res.status(200).json({ message: 'User login successfully', token, user:{
+            id:user._id,
+            firstName:user.firstName,
+            lastName:user.lastName,
+            email:user.email,
+        } });
+        return 
+        
+    } catch (error) {
+        const message =(error as { detail?: string }).detail || 'Internal Server Error';
+          res.status(500).send(message);
+          return 
+      }
 };
 

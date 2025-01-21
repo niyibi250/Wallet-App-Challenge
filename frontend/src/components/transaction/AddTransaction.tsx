@@ -3,75 +3,80 @@ import { Formik, Field, ErrorMessage, Form } from 'formik';
 import * as Yup from 'yup';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useCategories } from '../../utils/CategoriesContext';
-import { useAccount } from '../../utils/AccountContext';
+import { useAppSelector, useAppDispatch } from '../../state/hooks';
+import { RootState } from '../../state/store';
+import { createTransaction } from '../../state/transaction/transactionSlice'; // Adjust path to your transaction slice
 
 interface AddTransactionCardProps {
   onClose: () => void;
-  onSave: (values: TransactionValues) => void;
 }
 
-interface user {
-  id: string;
-  name: string;
-  email: string;
-}
 interface TransactionValues {
   userId: string;
-  accountName: string;
+  accountId: string;
   type: string;
   amount: string;
-  categoryName: string;
+  categoryId: string;
   description: string;
   date: Date | null;
 }
 
-const AddTransactiontable = ({ onClose, onSave }: AddTransactionCardProps) => {
-  const { categories } = useCategories();
-  const { account } = useAccount();
+const validationSchema = Yup.object().shape({
+  type: Yup.string().required('Transaction type is required'),
+  description: Yup.string().required('Description is required'),
+  categoryId: Yup.string().required('Category is required'),
+  accountId: Yup.string().required('Account is required'),
+  amount: Yup.number()
+    .typeError('Amount must be a number')
+    .positive('Amount must be positive')
+    .required('Amount is required'),
+  date: Yup.date().nullable().required('Date is required'),
+});
+
+const initialValues: TransactionValues = {
+  userId: '',
+  accountId: '',
+  type: 'Expense',
+  amount: '',
+  categoryId: '',
+  description: '',
+  date: null,
+};
+
+const AddTransactiontable = ({ onClose }: AddTransactionCardProps) => {
+  const { categories } = useAppSelector((state: RootState) => state.category);
+  const { accounts } = useAppSelector((state: RootState) => state.account);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-
-  // console.log('categories in add transaction:',categories);
-  console.log(account);
-
-  const validationSchema = Yup.object().shape({
-    type: Yup.string().required('Transaction type is required'),
-    description: Yup.string().required('Description is required'),
-    categoryName: Yup.string().required('Category is required'),
-    accountName: Yup.string().required('Account is required'),
-    amount: Yup.number()
-      .typeError('Amount must be a number')
-      .positive('Amount must be positive')
-      .required('Amount is required'),
-    date: Yup.date().nullable().required('Date is required'),
-  });
-
-  const initialValues = {
-    userId: '',
-    accountName: '',
-    type: 'Expense',
-    amount: '',
-    categoryName: 'Food',
-    description: '',
-    date: null,
-  };
- // const url = 'http://localhost:3000/api'
-  const url = 'https://wallet-app-challenge-backend.onrender.com/api'
-  const handleSubmit = async (values: typeof initialValues) => {
+  
+  const handleSubmit = async (values: TransactionValues) => {
     try {
-      const user: user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '') : { id: '', name: '', email: '' };
-      const formData = { ...values, userId: user.id};
-      const response = await axios.post(`${url}/transactions/`, formData);
-      console.log('Response:', response.data);
+      const validType = values.type.toLowerCase() as "income" | "expense" | "saving";
+  
+      if (!["income", "expense", "saving"].includes(validType)) {
+        throw new Error("Invalid transaction type");
+      }
+  
+      const transactionData = {
+        account: values.accountId,
+        category: values.categoryId,
+        subcategory: '',
+        amount: parseFloat(values.amount),
+        type: validType,
+        date: values.date ? values.date.toISOString() : '',
+        notes: values.description,
+      };
+  
+      await dispatch(createTransaction({ transactionData }));
       navigate('/dashboard');
+      onClose();
     } catch (error) {
-      console.error('Account creation failed:', error);
+      console.error('Transaction creation failed:', error);
     }
-    onSave({ ...values, userId: localStorage.getItem('userid') || '' });
-    onClose();
   };
+  
+  
 
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex items-center justify-center">
@@ -127,14 +132,13 @@ const AddTransactiontable = ({ onClose, onSave }: AddTransactionCardProps) => {
                     <label className="block font-semibold">Category</label>
                     <Field
                       as="select"
-                      name="categoryName"
+                      name="categoryId"
                       className="w-full font-semibold text-lg border-2 rounded-lg p-2 mt-1 focus:border-primary focus:outline-none"
                     >
-                      {/* Render category options */}
                       {categories && categories.length > 0 ? (
                         categories.map((category) => (
-                          <option key={category._id} value={category.categoryName}>
-                            {category.categoryName}
+                          <option key={category._id} value={category._id}>
+                            {category.name}
                           </option>
                         ))
                       ) : (
@@ -142,7 +146,7 @@ const AddTransactiontable = ({ onClose, onSave }: AddTransactionCardProps) => {
                       )}
                     </Field>
                     <ErrorMessage
-                      name="categoryName"
+                      name="categoryId"
                       component="div"
                       className="text-red-500 text-sm mt-1"
                     />
@@ -151,14 +155,13 @@ const AddTransactiontable = ({ onClose, onSave }: AddTransactionCardProps) => {
                     <label className="block font-semibold">Account</label>
                     <Field
                       as="select"
-                      name="accountName"
+                      name="accountId"
                       className="w-full font-semibold text-lg border-2 rounded-lg p-2 mt-1 focus:border-primary focus:outline-none"
                     >
-                       {/* Render account options */}
-                       {account && account.length > 0 ? (
-                        account.map((acc) => (
-                          <option key={acc._id} value={acc.accountName}>
-                            {acc.accountName}
+                      {accounts && accounts.length > 0 ? (
+                        accounts.map((account) => (
+                          <option key={account._id} value={account._id}>
+                            {account.accountName}
                           </option>
                         ))
                       ) : (
@@ -166,7 +169,7 @@ const AddTransactiontable = ({ onClose, onSave }: AddTransactionCardProps) => {
                       )}
                     </Field>
                     <ErrorMessage
-                      name="accountName"
+                      name="accountId"
                       component="div"
                       className="text-red-500 text-sm mt-1"
                     />

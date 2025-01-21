@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useTransactions } from '../../utils/TransactionsContext';
+import { useAppSelector } from '../../state/hooks';
+import { RootState } from '../../state/store';
 
 const TransactionTable = () => {
-  const { transactions } = useTransactions();
+  const { transactions } = useAppSelector((state: RootState) => state.transaction);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const transactionsPerPage = 8;
@@ -13,8 +14,9 @@ const TransactionTable = () => {
 
   const filteredTransactions = transactions.filter(transaction => {
     if (selectedFilter === 'All') return true;
-    if (selectedFilter === 'Income') return Number(transaction.amount) > 0;
-    if (selectedFilter === 'Expense') return Number(transaction.amount) < 0;
+    if (selectedFilter === 'Income') return transaction.type === 'income';
+    if (selectedFilter === 'Expense') return transaction.type === 'expense';
+    if (selectedFilter === 'Savings') return transaction.type === 'saving';
     return true;
   });
 
@@ -51,13 +53,19 @@ const TransactionTable = () => {
                 className={`hover:text-gray-200 ${selectedFilter === 'Income' ? 'text-primary' : ''}`} 
                 onClick={() => handleFilterChange('Income')}
               >
-                Income
+                Incomes
               </button>
               <button 
                 className={`hover:text-gray-200 ${selectedFilter === 'Expense' ? 'text-primary' : ''}`} 
                 onClick={() => handleFilterChange('Expense')}
               >
                 Expenses
+              </button>
+              <button 
+                className={`hover:text-gray-200 ${selectedFilter === 'Savings' ? 'text-primary' : ''}`} 
+                onClick={() => handleFilterChange('Savings')}
+              >
+                Savings
               </button>
             </div>
             <div className="flex items-center gap-2">
@@ -78,11 +86,11 @@ const TransactionTable = () => {
             <tbody>
               {currentTransactions.map((transaction, index) => (
                 <tr key={index} className="font-semibold border-b border-gray-800">
-                  <td className="py-4">{transaction.accountName}</td>
+                  <td className="py-4">{transaction.account.accountName}</td>
                   <td>{transaction.date ? new Date(transaction.date).toLocaleDateString() : ''}</td>
-                  <td>{transaction.categoryName}</td>
-                  <td className={Number(transaction.amount) > 0 ? "text-green-400" : "text-red-400"}>
-                    {Number(transaction.amount) > 0 ? "+" : ""}
+                  <td>{transaction.category.name}</td>
+                  <td className={transaction.type !== 'expense' ? "text-primary" : "text-Red"}>
+                    {transaction.type !== 'expense' ? "+" : "-"}
                     {transaction.amount}
                   </td>
                 </tr>

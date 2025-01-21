@@ -1,65 +1,55 @@
-interface TransactionValues {
-    userId: string;
-    accountName: string;
-    type: string;
-    amount: string; // as string because of API response
-    categoryName: string;
-    description: string;
-    date: Date | null;
-  }
-  
-  interface CurrentPrevMonthExpenseResult {
-    currentMonthExpenses: number[];
-    prevMonthExpenses: number[];
-    categories: string[];
-  }
-  
-  const calculateCategoryExpensesCurrentPrevMonth = (transactions: TransactionValues[]): CurrentPrevMonthExpenseResult => {
-    // Get the current and previous month/year
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
-    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-    const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-  
-    // Helper function to filter transactions by month and year
-    const filterTransactionsByMonth = (year: number, month: number) => {
-      return transactions.filter(transaction => {
-        if (!transaction.date) return false;
-        const transDate = new Date(transaction.date);
-        return transDate.getFullYear() === year && transDate.getMonth() === month;
-      });
-    };
-  
-    // Filter transactions for current and previous months
-    const currentMonthTransactions = filterTransactionsByMonth(currentYear, currentMonth);
-    const prevMonthTransactions = filterTransactionsByMonth(prevYear, prevMonth);
-  
-    // Group transactions by category and sum their amounts
-    const groupAndSumByCategory = (transactions: TransactionValues[]) => {
-      const groupedByCategory = transactions.reduce((acc, transaction) => {
-        if (!acc[transaction.categoryName]) {
-          acc[transaction.categoryName] = 0;
-        }
-        acc[transaction.categoryName] += parseFloat(transaction.amount);
-        return acc;
-      }, {} as { [key: string]: number });
-  
-      return {
-        categories: Object.keys(groupedByCategory),
-        expenses: Object.values(groupedByCategory),
-      };
-    };
-  
-    const currentMonthResult = groupAndSumByCategory(currentMonthTransactions);
-    const prevMonthResult = groupAndSumByCategory(prevMonthTransactions);
-  
-    const categories = currentMonthResult.categories.length > 0 ? currentMonthResult.categories : prevMonthResult.categories;
-    const currentMonthExpenses = currentMonthResult.expenses.length > 0 ? currentMonthResult.expenses : prevMonthResult.expenses;
-    const prevMonthExpenses = prevMonthResult.expenses;
-  
-    return { currentMonthExpenses, prevMonthExpenses, categories };
+import {Transaction} from "../types/transactionType";
+
+const calculateCategoryExpensesCurrentPrevMonth = (transactions: Transaction[]) => {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  const currentMonthStart = new Date(currentYear, currentMonth, 1);
+  const currentMonthEnd = new Date(currentYear, currentMonth + 1, 0);
+
+  const prevMonthStart = new Date(currentYear, currentMonth - 1, 1);
+  const prevMonthEnd = new Date(currentYear, currentMonth, 0);
+
+  const currentMonthExpenses: { [key: string]: number } = {};
+  const prevMonthExpenses: { [key: string]: number } = {};
+
+  const addExpense = (expenseMap: { [key: string]: number }, category: string, amount: number): void => {
+    if (!expenseMap[category]) {
+      expenseMap[category] = 0;
+    }
+    expenseMap[category] += amount;
   };
-  
-  export default calculateCategoryExpensesCurrentPrevMonth;
-  
+
+  transactions.forEach((transaction) => {
+    const transactionDate = new Date(transaction.date);
+    const category = transaction.category.name;
+    const amount = transaction.amount;
+
+    if (transactionDate >= currentMonthStart && transactionDate <= currentMonthEnd) {
+      addExpense(currentMonthExpenses, category, amount);
+    }
+
+    if (transactionDate >= prevMonthStart && transactionDate <= prevMonthEnd) {
+      addExpense(prevMonthExpenses, category, amount);
+    }
+  });
+
+  const categories = [
+    ...new Set([
+      ...Object.keys(currentMonthExpenses),
+      ...Object.keys(prevMonthExpenses),
+    ]),
+  ];
+
+  const currentMonthExpensesArray = categories.map((category) => currentMonthExpenses[category] || 0);
+  const prevMonthExpensesArray = categories.map((category) => prevMonthExpenses[category] || 0);
+
+  return {
+    currentMonthExpenses: currentMonthExpensesArray,
+    prevMonthExpenses: prevMonthExpensesArray,
+    categories,
+  };
+};
+
+export default calculateCategoryExpensesCurrentPrevMonth;

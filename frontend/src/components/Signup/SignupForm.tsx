@@ -3,37 +3,42 @@ import { useNavigate } from 'react-router-dom';
 import { Formik, Field, ErrorMessage, Form} from 'formik';
 import * as Yup from 'yup';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
-import axios from 'axios';
+import { useAppDispatch } from '../../state/hooks';
+import { registerUser } from '../../state/Auth/signupSlice';
+import { showSuccessToast } from '../../utils/ToastConfig';
+import { AppDispatch } from '../../state/store';
 
 
 interface FormValues {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
 }
+const validationSchema = Yup.object().shape({
+  firstName: Yup.string().required('First name is required'),
+  lastName: Yup.string().required('Last name is required'),
+  email: Yup.string().email('Invalid email').required('Email is required'),
+  password: Yup.string()
+    .min(8, 'Password must be at least 8 characters')
+    .required('Password is required'),
+});
 
 const Signupform = () => {
+  const dispatch: AppDispatch = useAppDispatch();
   const navigate = useNavigate();
   const [passwordVisible, setPasswordVisible] = useState(false);
-
-  const validationSchema = Yup.object().shape({
-    name: Yup.string().required('Username is required'),
-    email: Yup.string().email('Invalid email').required('Email is required'),
-    password: Yup.string()
-      .min(8, 'Password must be at least 8 characters')
-      .required('Password is required'),
-  });
-  // const url = 'http://localhost:3000/api'
-  const url = 'https://wallet-app-challenge-backend.onrender.com/api'
-  const handleSubmit = async (values: FormValues) => {
-    try {
-      const response = await axios.post(`${url}/users/register`, values);
-      console.log('Response:', response.data);
-      navigate('/login');
-    } catch (error) {
-      console.error('Signup failed:', error);
-    }
-  };
+  
+   const handleSubmit = async (values: FormValues) => {
+      const resultAction = await dispatch(registerUser(values));
+      if (registerUser.fulfilled.match(resultAction)) {
+        showSuccessToast(`${resultAction.payload.user.lastName} Logged in Successfully`);
+        navigate('/dashboard');
+      }     
+      else if (registerUser.rejected.match(resultAction)) {
+        console.error(resultAction.payload || 'Login failed.');
+      }
+    };
 
   return (
     <div className="bg-white p-8 shadow-lg w-full h-full">
@@ -42,26 +47,45 @@ const Signupform = () => {
       </h1>
       <h2 className="text-xl text-Grey-80 mb-4 font-bold text-start">Sign Up</h2>
       <Formik
-        initialValues={{ name: '', email: '', password: '' }}
+        initialValues={{ firstName: '', lastName: '', email: '', password: '' }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ isSubmitting }) => (
+        {({isSubmitting }) => (
           <Form className="space-y-4 flex flex-col justify-center">
             <div>
-              <label htmlFor="username" className="block text-Grey-80 font-semibold">
-                Username
+              <label htmlFor="firstName" className="block text-Grey-80 font-semibold">
+                FirstName
               </label>
               <Field
                 type="text"
-                id="username"
-                name="name"
+                id="firstName"
+                name="firstName"
                 className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
-                placeholder="Enter your username"
+                placeholder="Enter your FirstName"
               />
               <div className="h-5">
                 <ErrorMessage
-                  name="name"
+                  name="firstName"
+                  component="div"
+                  className="text-Red font-accent font-bold text-sm"
+                />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="lastName" className="block text-Grey-80 font-semibold">
+                LastName
+              </label>
+              <Field
+                type="text"
+                id="lastName"
+                name="lastName"
+                className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                placeholder="Enter your LastName"
+              />
+              <div className="h-5">
+                <ErrorMessage
+                  name="lastName"
                   component="div"
                   className="text-Red font-accent font-bold text-sm"
                 />

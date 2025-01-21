@@ -1,10 +1,13 @@
 import { RiLogoutBoxRLine } from "react-icons/ri";
 import { useNavigate } from 'react-router-dom';
+import { logout } from '../../state/Auth/siginSlice';
+import { useAppDispatch } from '../../state/hooks';
+
 export function Logout() {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    dispatch(logout());
     navigate('/');
   }
   return (

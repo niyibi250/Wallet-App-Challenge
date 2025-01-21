@@ -9,17 +9,17 @@ interface TransactionValues {
 }
 
 interface SortedTransaction {
-  type: string; // Transaction type: Income, Expense, Saving
-  totalAmount: number; // Total amount for this transaction type
-  prevMonthTotal: number; // Previous month's total amount for this transaction type
-  differencePercentage: number; // Percentage difference between current month and previous month
-  lastTransaction: TransactionValues | null; // Most recent transaction for this type
+  type: string;
+  totalAmount: number;
+  prevMonthTotal: number;
+  differencePercentage: number;
+  lastTransaction: TransactionValues | null;
 }
 
 interface OverallBalances {
-  totalBalance: number; // Total balance for all accounts this month
-  prevMonthBalance: number; // Previous month's total balance for all accounts
-  balanceDifferencePercentage: number; // Percentage difference between current and previous month's total balance
+  totalBalance: number;
+  prevMonthBalance: number;
+  balanceDifferencePercentage: number;
 }
 
 const sortAndSummarizeTransactions = (
@@ -42,14 +42,10 @@ const sortAndSummarizeTransactions = (
   const sortedSummary: SortedTransaction[] = Object.keys(groupedTransactions).map(
     (type) => {
       const typeTransactions = groupedTransactions[type];
-
-      // Current month's total
       const totalAmount = typeTransactions.reduce(
         (sum, transaction) => sum + parseFloat(transaction.amount),
         0
       );
-
-      // Previous month's total
       const prevMonthTransactions = typeTransactions.filter(
         (transaction) =>
           transaction.date &&
@@ -59,13 +55,9 @@ const sortAndSummarizeTransactions = (
         (sum, transaction) => sum + parseFloat(transaction.amount),
         0
       );
-
-      // Percentage difference
       const differencePercentage = prevMonthTotal > 0
         ? parseFloat((((totalAmount - prevMonthTotal) / prevMonthTotal) * 100).toFixed(2))
         : 0;
-
-      // Most recent transaction
       const lastTransaction = typeTransactions.reduce((latest, transaction) => {
         if (!latest || (transaction.date && new Date(transaction.date) > new Date(latest.date!))) {
           return transaction;
@@ -83,7 +75,6 @@ const sortAndSummarizeTransactions = (
     }
   );
 
-  // Calculate overall balances
   const allTransactions = Object.values(groupedTransactions).flat();
   const currentMonthTotalBalance = allTransactions.reduce(
     (sum, transaction) => sum + parseFloat(transaction.amount),
@@ -113,3 +104,4 @@ const sortAndSummarizeTransactions = (
 };
 
 export default sortAndSummarizeTransactions;
+

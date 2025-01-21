@@ -1,13 +1,6 @@
 import { FiMoreVertical, FiTrash2 } from "react-icons/fi";
 const CategoryBudgets = () => {
 
- 
-  // Processing Each Budget
-// const results = budgets.map(budget => {
-//   const { categoryName, startDate, endDate } = budget;
-//   return calculateTotalExpense(transactions, startDate, endDate, categoryName);
-// });
-
 
   const categories = [
     {
@@ -15,48 +8,45 @@ const CategoryBudgets = () => {
       total: 1200,
       spent: 820,
       color: "#FF6B6B",
-      startDate: new Date(2025, 0, 1), // Start date
-      endDate: new Date(2025, 11, 31), // End date
+      startDate: new Date(2025, 0, 1),
+      endDate: new Date(2025, 11, 31),
     },
     {
       name: "Utilities",
       total: 800,
       spent: 690,
       color: "#FFD93D",
-      startDate: new Date(2025, 0, 1), // Start date
-      endDate: new Date(2025, 11, 31), // End date
+      startDate: new Date(2025, 0, 1),
+      endDate: new Date(2025, 11, 31),
     },
     {
       name: "Health",
       total: 400,
       spent: 160,
       color: "#4CAF50",
-      startDate: new Date(2025, 0, 1), // Start date
-      endDate: new Date(2025, 11, 31), // End date
+      startDate: new Date(2025, 0, 1),
+      endDate: new Date(2025, 11, 31),
     },
     {
       name: "Car",
       total: 260,
       spent: 120,
       color: "#2196F3",
-      startDate: new Date(2025, 0, 1), // Start date
-      endDate: new Date(2025, 11, 31), // End date
+      startDate: new Date(2025, 0, 1),
+      endDate: new Date(2025, 11, 31),
     },
     {
       name: "Else",
       total: 4590,
       spent: 1320,
       color: "#9C27B0",
-      startDate: new Date(2025, 0, 1), // Start date
-      endDate: new Date(2025, 11, 31), // End date
+      startDate: new Date(2025, 0, 1),
+      endDate: new Date(2025, 11, 31),
     },
   ];
 
-  const handleDelete = (index: number) => {
-    const updatedCategories = [...categories];
-    updatedCategories.splice(index, 1);
-    // Assuming there's a state update to manage categories
-    // setCategories(updatedCategories);
+  const handleDelete = () => {
+  
   };
 
   return (
@@ -78,21 +68,19 @@ const CategoryBudgets = () => {
 
             return (
               <div key={index} className="font-accent text-Grey-80 font-bold">
-                {/* Category Info */}
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-gray-600">{category.name}</span>
                   <span className="font-medium">
                     $ {category.total.toLocaleString()}
                   </span>
                   <button
-                    onClick={() => handleDelete(index)}
+                    onClick={() => handleDelete()}
                     className="p-1 hover:bg-gray-200 rounded-full"
                   >
                     <FiTrash2 className="h-4 w-4 text-red-500" />
                   </button>
                 </div>
 
-                {/* Progress Bar */}
                 <div className="relative h-4 bg-gray-100 rounded-full mb-1">
                   <div
                     className="absolute left-0 top-0 h-full rounded-full"
@@ -103,7 +91,6 @@ const CategoryBudgets = () => {
                   ></div>
                 </div>
 
-                {/* Amount Details */}
                 <div className="flex justify-between text-sm">
                   <div className="text-gray-500">
                     $ {category.spent.toLocaleString()}
@@ -115,7 +102,6 @@ const CategoryBudgets = () => {
                   </div>
                 </div>
 
-                {/* Date Details */}
                 <div className="text-gray-500 text-sm">
                   {category.startDate.toLocaleDateString()} - {category.endDate.toLocaleDateString()}
                 </div>

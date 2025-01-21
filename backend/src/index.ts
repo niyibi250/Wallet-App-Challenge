@@ -12,18 +12,14 @@ const PORT = process.env.PORT || 5000;
 const app = express();
 app.use(express.json());
 
-// Allow all origins
 app.use(cors());
 
-// Route for the index page
 app.get('/', (req: Request, res: Response): void => {
     res.status(200).json({ message: 'Welcome To The Dynamites backend e-commerce' });
 });
   
-  // Middleware to handle all endpoint routes
   app.use('/api', router);
 
-// Route for serving Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const startServer = async function(){

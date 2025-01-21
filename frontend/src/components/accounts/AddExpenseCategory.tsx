@@ -2,8 +2,9 @@ import { IoCloseCircleOutline } from 'react-icons/io5';
 import { AiOutlinePlus, AiOutlineMinus } from 'react-icons/ai';
 import { Formik, Field, Form, ErrorMessage, FieldArray } from 'formik';
 import * as Yup from 'yup';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useAppDispatch } from '../../state/hooks';
+import {  createCategory } from '../../state/category/CategorySlice';
+
 
 interface SubCategory {
   name: String,
@@ -16,40 +17,38 @@ interface AddExpenseCategoryCardProps {
     subcategories?: SubCategory[];
   }) => void;
 }
-
+const validationSchema = Yup.object().shape({
+  name: Yup.string().required('Category name is required'),
+  subcategories: Yup.array()
+    .of(
+      Yup.string()
+        .required('Subcategory cannot be empty')
+        .transform((value) => value?.trim())
+    )
+    .min(1, 'At least one subcategory is required'),
+});
+const initialValues = {
+  name: '',
+  subcategories: [''],
+};
 const AddExpenseCategory = ({ onClose}: AddExpenseCategoryCardProps) => {
-  const navigate = useNavigate();
-  const validationSchema = Yup.object().shape({
-    categoryName: Yup.string().required('Category name is required'),
-    subcategories: Yup.array()
-      .of(Yup.string().required('Subcategory cannot be empty'))
-      .min(1, 'At least one subcategory is required'),
-  });
-  const initialValues = {
-    categoryName: '',
-    subcategories: [''],
-  };
-
-  interface user {
-    id: string;
-    name: string;
-    email: string;
-  }
-  // const url = 'http://localhost:3000/api'
-  const url = 'https://wallet-app-challenge-backend.onrender.com/api'
-  const handleSubmit = async (values: typeof initialValues) => {
-    try {
-      const user: user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '') : { id: '', name: '', email: '' };
-      const formData = { ...values, userId: user.id};
+  const dispatch = useAppDispatch();
   
-      const response = await axios.post(`${url}/categories/create`, formData);
-      console.log('Response:', response.data);
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Account creation failed:', error);
+
+  const handleSubmit = async (values: typeof initialValues) => {
+    const transformedData = {
+      name: values.name,
+      subcategories: values.subcategories.map((subcategory) => ({ name: subcategory })),
+    };
+  
+    const resultAction = await dispatch(createCategory({ categoryData: transformedData }));
+    if (createCategory.fulfilled.match(resultAction)) {
+      onClose();
+    } else if (createCategory.rejected.match(resultAction)) {
+      console.error(resultAction.payload || 'Category creation failed.');
     }
-    onClose();
   };
+  
 
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-Grey-80 bg-opacity-50 flex items-center justify-center">
@@ -63,26 +62,26 @@ const AddExpenseCategory = ({ onClose}: AddExpenseCategoryCardProps) => {
           />
         </div>
         <Formik
-          initialValues={{ categoryName: '', subcategories: [] }}
+          initialValues={{ name: '', subcategories: [] }}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
           {({ values, isSubmitting }) => (
             <Form className="space-y-4">
               <div>
-                <label htmlFor="categoryName" className="block text-Grey-100 font-semibold">
+                <label htmlFor="name" className="block text-Grey-100 font-semibold">
                   Category Name
                 </label>
                 <Field
                   type="text"
-                  id="categoryName"
-                  name="categoryName"
+                  id="name"
+                  name="name"
                   className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
                   placeholder="Enter Category Name"
                 />
                 <div className="h-5">
                   <ErrorMessage
-                    name="categoryName"
+                    name="name"
                     component="div"
                     className="text-Red font-accent font-bold text-sm"
                   />

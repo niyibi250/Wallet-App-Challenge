@@ -1,11 +1,13 @@
 import { Router } from 'express';
-import { createBudget, getBudgets, updateBudget, deleteBudget } from '../controllers/budgetController';
+import {createBudget,getBudgets,updateBudget,deleteBudget,getBudgetById,} from '../controllers/budgetController';
+import { authMiddleware } from '../middleware/authMiddleware';
 
-const burgetRouter = Router();
+const budgetRouter = Router();
 
-burgetRouter.post('/', createBudget); // Create a new budget
-burgetRouter.get('/', getBudgets); // Get all budgets
-burgetRouter.put('/:id', updateBudget); // Update a budget by ID
-burgetRouter.delete('/:id', deleteBudget); // Delete a budget by ID
+budgetRouter.post('/', authMiddleware, createBudget); 
+budgetRouter.get('/', authMiddleware, getBudgets); 
+budgetRouter.get('/:id', authMiddleware, getBudgetById);
+budgetRouter.put('/:id', authMiddleware, updateBudget);
+budgetRouter.delete('/:id', authMiddleware, deleteBudget);
 
-export default burgetRouter;
+export default budgetRouter;

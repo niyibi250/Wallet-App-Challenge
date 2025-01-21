@@ -3,7 +3,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const ToastProps: ToastContainerProps = {
   position: 'top-right',
-  autoClose: 5000,
+  autoClose: 7000,
   hideProgressBar: false,
   newestOnTop: false,
   closeOnClick: true,
@@ -18,7 +18,7 @@ const customToastOptionError: ToastOptions = {
 };
 
 const customToastOptionSuccess: ToastOptions = {
-  className: 'bg-white-400 text-gree text-sm p-4 rounded shadow-lg',
+  className: 'bg-white-400 text-primary text-sm p-4 rounded shadow-lg',
 };
 
 const customToastOptionInfo: ToastOptions = {

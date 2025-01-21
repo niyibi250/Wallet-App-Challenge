@@ -13,7 +13,6 @@ const CashSummaryCard = () => {
   return (
     <div className="w-full h-full rounded-lg shadow-lg border bg-white">
       <div className="px-10 py-6">
-        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-medium">My Cash</h2>
           <div className="flex gap-2">
@@ -32,7 +31,6 @@ const CashSummaryCard = () => {
           </div>
         </div>
 
-        {/* Cash Items */}
         <div className="space-y-3">
           {cashData.map((item, index) => (
             <div key={index} className="flex justify-between items-center">
@@ -43,7 +41,6 @@ const CashSummaryCard = () => {
             </div>
           ))}
 
-          {/* Total */}
           <div className="pt-3 mt-3 border-t">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">All Cash</span>

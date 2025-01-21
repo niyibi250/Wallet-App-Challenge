@@ -7,7 +7,6 @@ import accountRouter from './accountRoutes';
 
 const router = Router();
 
-// Mount specific route files
 router.use('/users', userRoutes);
 router.use('/accounts', accountRouter);
 router.use('/budgets', budgetRoutes);

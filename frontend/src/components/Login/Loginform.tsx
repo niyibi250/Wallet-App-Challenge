@@ -3,36 +3,34 @@ import { useNavigate } from 'react-router-dom';
 import { Formik, Field, ErrorMessage, Form} from 'formik';
 import * as Yup from 'yup';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
-import axios from 'axios';
+import { useAppDispatch, useAppSelector } from '../../state/hooks';
+import { loginUser } from '../../state/Auth/siginSlice';
 
 interface FormValues {
   email: string;
   password: string;
 }
 
+const validationSchema = Yup.object().shape({
+  email: Yup.string().email('Invalid email').required('Email is required'),
+  password: Yup.string()
+    .min(8, 'Password must be at least 8 characters')
+    .required('Password is required'),
+});
+
+
 const   Loginform = () => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const validationSchema = Yup.object().shape({
-    email: Yup.string().email('Invalid email').required('Email is required'),
-    password: Yup.string()
-      .min(8, 'Password must be at least 8 characters')
-      .required('Password is required'),
-  });
-
-  // const url = 'http://localhost:3000/api'
-  const url = 'https://wallet-app-challenge-backend.onrender.com/api'
+  const { loading } = useAppSelector((state) => state.signIn);
   const handleSubmit = async (values: FormValues) => {
-    try {
-      const response = await axios.post(`${url}/users/login`, values);
-      console.log('Response:', response.data);
-      const { user, token } = response.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+    const resultAction = await dispatch(loginUser(values));
+    if (loginUser.fulfilled.match(resultAction)) {
       navigate('/dashboard');
-    } catch (error) {
-      console.error('Signup failed:', error);
+    } else if (loginUser.rejected.match(resultAction)) {
+      console.error(resultAction.payload || 'Login failed.');
     }
   };
 
@@ -48,7 +46,7 @@ const   Loginform = () => {
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ isSubmitting }) => (
+        {({ }) => (
           <Form className="space-y-4 flex flex-col justify-center">
             <div>
               <label htmlFor="email" className="block text-Grey-80 font-semibold">
@@ -100,10 +98,10 @@ const   Loginform = () => {
             </div>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={loading}
               className="w-full bg-primary text-white py-2 rounded-lg hover:bg-green-700 transition"
             >
-              {isSubmitting ? 'Submitting...' : 'Sign In'}
+              {loading ? 'Submitting...' : 'Sign In'}
             </button>
           </Form>
         )}

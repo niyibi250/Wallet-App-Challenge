@@ -1,81 +1,102 @@
 import { Request, Response } from 'express';
 import { Account } from '../models/Account';
-import { User } from '../models/User';
 
-// Interface for updating an account
-export interface UpdateAccountRequestBody {
-    accountName?: string;    // Optional update for account name
-    accountType?: string;    // Optional update for account type
-    accountBalance?: number; // Optional update for account balance
-}
+interface AuthenticatedRequest extends Request {
+    user?: { id: string; firstName: string; lastName: string; email: string };
+  }
 
-// Interface for creating an account
-export interface CreateAccountRequestBody {
-    userid: string;
-    accountName: string;     // Name of the account
-    accountNumber: string;   // Unique identifier for the account
-    accountType: string;     // Type of the account (e.g., Bank, Cash, MobileMoney)
-    accountBalance: number;  // Initial balance of the account
-}
+export const createAccount = async (req: AuthenticatedRequest, res: Response) => {
+  console.log(req.body)
+  try {
+    const user = req.user?.id;
+    const { accountName, accountNumber, accountType, balance } = req.body;
 
-export const createAccount = async (req: Request, res: Response): Promise<void> => {
-    console.log(req.body)
-    try {
-        const { userid,accountName, accountNumber, accountType, accountBalance } = req.body as CreateAccountRequestBody;
-        const userExists = await User.findById( userid );
-        if (userExists) {
-            const account = new Account({ userid,accountName, accountNumber, accountType, accountBalance });
-            await account.save();
-            res.status(201).json({ success: true, account });
-        } else {
-            res.status(404).json({ success: false, message: 'User does not exist' });
-        }
-    } catch (error: any) {
-        res.status(500).json({ success: false, error: error.message });
+    const requiredFields = ['accountName', 'accountNumber', 'accountType', 'balance'].filter(field => !req.body[field]);
+    if (requiredFields.length > 0) {
+      res.status(400).json({ message: `Missing required fields: ${requiredFields.join(', ')}` });
+      return 
     }
+
+    const account = new Account({
+      accountName,
+      accountNumber,
+      accountType,
+      balance,
+      user,
+    });
+    await account.save();
+    res.status(201).json({ message: 'Account created successfully', account });
+    return 
+
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error creating account', error: error.message });
+    return 
+  }
 };
 
-export const getAccounts = async (req: Request, res: Response): Promise<void> => {
-    console.log(req.query)
+// Get all accounts for a specific user
+export const getAccounts = async (req: AuthenticatedRequest, res: Response) => {
     try {
-        const { userId } = req.query;
-        const userExists = await User.findById( userId );
-        if (userExists) {
-            const accounts = await Account.find();
-            res.status(200).json({ success: true, accounts });
-        } else {
-            res.status(404).json({ success: false, message: 'User does not exist' });
-        }
-        
+      const userId = req.user?.id;
+  
+      if (!userId) {
+        res.status(400).json({ message: 'User ID is required' });
+        return;
+      }
+  
+      const accounts = await Account.find({ user: userId });
+  
+      if (!accounts || accounts.length === 0) {
+        res.status(404).json({ message: 'No accounts found' });
+        return;
+      }
+      res.status(200).json(accounts);
+      return
+
     } catch (error: any) {
-        res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ message: 'Error fetching accounts', error: error.message });
+      return
     }
+  };
+  
+
+// Update an existing account
+export const updateAccount = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.query;
+    const updates = req.body;
+
+    const account = await Account.findByIdAndUpdate(id, updates, { new: true });
+
+    if (!account) {
+      res.status(404).json({ message: 'Account not found' });
+      return 
+    }
+
+    res.status(200).json({ message: 'Account updated successfully', account });
+    return 
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error updating account', error: error.message });
+    return 
+  }
 };
 
-export const updateAccount = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { id } = req.params;
-        const updatedAccount = await Account.findByIdAndUpdate(id, req.body as UpdateAccountRequestBody, { new: true });
-        if (!updatedAccount) {
-            res.status(404).json({ success: false, message: 'Account not found' });
-            return;
-        }
-        res.status(200).json({ success: true, account: updatedAccount });
-    } catch (error: any) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-};
+// Delete an account
+export const deleteAccount = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.query;
 
-export const deleteAccount = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { id } = req.params;
-        const account = await Account.findByIdAndDelete(id);
-        if (!account) {
-            res.status(404).json({ success: false, message: 'Account not found' });
-            return;
-        }
-        res.status(200).json({ success: true, message: 'Account deleted successfully' });
-    } catch (error: any) {
-        res.status(500).json({ success: false, error: error.message });
+    const account = await Account.findByIdAndDelete(id);
+
+    if (!account) {
+      res.status(404).json({ message: 'Account not found' });
+      return 
     }
+
+    res.status(200).json({ message: 'Account deleted successfully', account });
+    return 
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error deleting account', error: error.message });
+    return 
+  }
 };

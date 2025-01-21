@@ -1,5 +1,6 @@
 import { Bar } from "react-chartjs-2";
-import { useTransactions } from '../../utils/TransactionsContext';
+import { useAppSelector } from '../../state/hooks';
+import { RootState } from '../../state/store';
 import calculateCategoryExpensesCurrentPrevMonth from '../../utils/CurrentPrevMonthExpense';
 import {
   Chart as ChartJS,
@@ -21,20 +22,20 @@ ChartJS.register(
 );
 
 const ExpensesCompared = () => {
-  const { transactions } = useTransactions();
+   const { transactions } = useAppSelector((state: RootState) => state.transaction);
   const { currentMonthExpenses, prevMonthExpenses, categories } = calculateCategoryExpensesCurrentPrevMonth(transactions);
 
   const data = {
     labels: categories,
     datasets: [
       {
-        label: "March",
+        label: "Current Month",
         data: currentMonthExpenses,
         backgroundColor: "#4A90E2",
         barThickness: 20,
       },
       {
-        label: "February",
+        label: "Previous Month",
         data: prevMonthExpenses,
         backgroundColor: "#50E3C2",
         barThickness: 20,
@@ -66,7 +67,7 @@ const ExpensesCompared = () => {
     scales: {
       y: {
         ticks: {
-          callback: function (value:any) {
+          callback: function (value: any) {
             return "$" + value;
           },
           color: "#4a5568",
@@ -74,7 +75,7 @@ const ExpensesCompared = () => {
         beginAtZero: true,
         title: {
           display: true,
-          text: "",
+          text: "Amount",
           color: "#4a5568",
         },
       },
@@ -97,4 +98,3 @@ const ExpensesCompared = () => {
 };
 
 export default ExpensesCompared;
-
